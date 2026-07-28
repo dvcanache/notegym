@@ -49,7 +49,7 @@ class AppShell extends StatelessWidget {
           filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
           child: Container(
             decoration: BoxDecoration(
-              color: context.colors.surface.withOpacity(0.85),
+              color: context.colors.surface.withValues(alpha: 0.85),
               border: Border(
                 top: BorderSide(
                   color: context.colors.glassBorder,
@@ -60,7 +60,7 @@ class AppShell extends StatelessWidget {
             child: NavigationBarTheme(
               data: NavigationBarThemeData(
                 backgroundColor: Colors.transparent,
-                indicatorColor: context.colors.primary.withOpacity(0.2),
+                indicatorColor: context.colors.primary.withValues(alpha: 0.2),
                 labelTextStyle: WidgetStateProperty.resolveWith((states) {
                   if (states.contains(WidgetState.selected)) {
                     return TextStyle(
@@ -93,7 +93,7 @@ class AppShell extends StatelessWidget {
                 onDestinationSelected: (index) {
                   context.go(_indexToLocation(index));
                 },
-                destinations: [
+                destinations: const [
                   NavigationDestination(
                     icon: Icon(Icons.home_outlined),
                     selectedIcon: Icon(Icons.home_rounded),

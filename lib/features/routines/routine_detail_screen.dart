@@ -38,7 +38,8 @@ class RoutineDetailScreen extends ConsumerWidget {
       body: Stack(
         children: [
           Container(
-            decoration: BoxDecoration(gradient: context.colors.backgroundGradient),
+            decoration:
+                BoxDecoration(gradient: context.colors.backgroundGradient),
           ),
           // Color accent top
           Positioned(
@@ -49,7 +50,7 @@ class RoutineDetailScreen extends ConsumerWidget {
               height: 200,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: context.colors.primary.withOpacity(0.15),
+                color: context.colors.primary.withValues(alpha: 0.15),
               ),
             ),
           ),
@@ -65,23 +66,31 @@ class RoutineDetailScreen extends ConsumerWidget {
                     padding: EdgeInsets.all(8),
                     child: GlassCard(
                       borderRadius: 12,
-                      child: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 16),
+                      child: Icon(Icons.arrow_back_ios_new_rounded,
+                          color: Colors.white, size: 16),
                     ),
                   ),
                 ),
                 actions: [
                   GestureDetector(
-                    onTap: () => ExcelExportService.exportRoutine(context, routine),
+                    onTap: () =>
+                        ExcelExportService.exportRoutine(context, routine),
                     child: Padding(
                       padding: const EdgeInsets.only(right: 16, top: 8),
                       child: GlassCard(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
                         borderRadius: 12,
                         child: Row(
                           children: [
-                            Icon(Icons.download_outlined, color: context.colors.accent, size: 16),
+                            Icon(Icons.download_outlined,
+                                color: context.colors.accent, size: 16),
                             const SizedBox(width: 6),
-                            Text('Exportar', style: TextStyle(color: context.colors.accent, fontSize: 12, fontWeight: FontWeight.w600)),
+                            Text('Exportar',
+                                style: TextStyle(
+                                    color: context.colors.accent,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600)),
                           ],
                         ),
                       ),
@@ -92,7 +101,10 @@ class RoutineDetailScreen extends ConsumerWidget {
                   background: Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [context.colors.primary.withOpacity(0.4), context.colors.background],
+                        colors: [
+                          context.colors.primary.withValues(alpha: 0.4),
+                          context.colors.background
+                        ],
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                       ),
@@ -104,9 +116,12 @@ class RoutineDetailScreen extends ConsumerWidget {
                           mainAxisAlignment: MainAxisAlignment.end,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(routine.emoji, style: const TextStyle(fontSize: 48)),
+                            Text(routine.emoji,
+                                style: const TextStyle(fontSize: 48)),
                             const SizedBox(height: 8),
-                            Text(routine.name, style: Theme.of(context).textTheme.displayMedium),
+                            Text(routine.name,
+                                style:
+                                    Theme.of(context).textTheme.displayMedium),
                             Text(routine.description,
                                 style: Theme.of(context).textTheme.bodyMedium,
                                 maxLines: 2,
@@ -118,7 +133,6 @@ class RoutineDetailScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-
               SliverPadding(
                 padding: const EdgeInsets.all(20),
                 sliver: SliverList(
@@ -126,19 +140,26 @@ class RoutineDetailScreen extends ConsumerWidget {
                     // Info chips
                     Row(
                       children: [
-                        _InfoChip(icon: Icons.timer_outlined, text: '${routine.estimatedMinutes} min'),
+                        _InfoChip(
+                            icon: Icons.timer_outlined,
+                            text: '${routine.estimatedMinutes} min'),
                         const SizedBox(width: 8),
-                        _InfoChip(icon: Icons.signal_cellular_alt_rounded, text: routine.difficulty),
+                        _InfoChip(
+                            icon: Icons.signal_cellular_alt_rounded,
+                            text: routine.difficulty),
                         const SizedBox(width: 8),
-                        _InfoChip(icon: Icons.fitness_center_outlined,
+                        _InfoChip(
+                            icon: Icons.fitness_center_outlined,
                             text: '${routine.exercises.length} ejercicios'),
                       ],
                     ).animate().fadeIn(delay: 100.ms),
 
                     const SizedBox(height: 24),
 
-                    Text('Ejercicios', style: Theme.of(context).textTheme.headlineMedium)
-                        .animate().fadeIn(delay: 200.ms),
+                    Text('Ejercicios',
+                            style: Theme.of(context).textTheme.headlineMedium)
+                        .animate()
+                        .fadeIn(delay: 200.ms),
                     const SizedBox(height: 12),
 
                     // Exercises list
@@ -155,16 +176,18 @@ class RoutineDetailScreen extends ConsumerWidget {
                                 width: 36,
                                 height: 36,
                                 decoration: BoxDecoration(
-                                  color: (context.colors.muscleColors[ex.muscleGroup] ??
+                                  color: (context.colors
+                                              .muscleColors[ex.muscleGroup] ??
                                           context.colors.primary)
-                                      .withOpacity(0.2),
+                                      .withValues(alpha: 0.2),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Center(
                                   child: Text(
                                     '${i + 1}',
                                     style: TextStyle(
-                                      color: context.colors.muscleColors[ex.muscleGroup] ??
+                                      color: context.colors
+                                              .muscleColors[ex.muscleGroup] ??
                                           context.colors.primary,
                                       fontWeight: FontWeight.w700,
                                       fontSize: 14,
@@ -177,14 +200,19 @@ class RoutineDetailScreen extends ConsumerWidget {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(ex.name, style: Theme.of(context).textTheme.titleMedium),
+                                    Text(ex.name,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium),
                                     const SizedBox(height: 2),
                                     Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 6, vertical: 2),
                                       decoration: BoxDecoration(
-                                        color: (context.colors.muscleColors[ex.muscleGroup] ??
+                                        color: (context.colors.muscleColors[
+                                                    ex.muscleGroup] ??
                                                 context.colors.primary)
-                                            .withOpacity(0.15),
+                                            .withValues(alpha: 0.15),
                                         borderRadius: BorderRadius.circular(4),
                                       ),
                                       child: Text(
@@ -192,7 +220,9 @@ class RoutineDetailScreen extends ConsumerWidget {
                                         style: TextStyle(
                                           fontSize: 10,
                                           fontWeight: FontWeight.w600,
-                                          color: context.colors.muscleColors[ex.muscleGroup] ?? context.colors.primary,
+                                          color: context.colors.muscleColors[
+                                                  ex.muscleGroup] ??
+                                              context.colors.primary,
                                         ),
                                       ),
                                     ),
@@ -213,13 +243,18 @@ class RoutineDetailScreen extends ConsumerWidget {
                                   if (ex.defaultWeight > 0)
                                     Text(
                                       '${ex.defaultWeight.toStringAsFixed(0)} kg',
-                                      style: TextStyle(color: context.colors.textMuted, fontSize: 11),
+                                      style: TextStyle(
+                                          color: context.colors.textMuted,
+                                          fontSize: 11),
                                     ),
                                 ],
                               ),
                             ],
                           ),
-                        ).animate().fadeIn(delay: (300 + i * 50).ms).slideY(begin: 0.1),
+                        )
+                            .animate()
+                            .fadeIn(delay: (300 + i * 50).ms)
+                            .slideY(begin: 0.1),
                       );
                     }),
 
@@ -261,7 +296,11 @@ class _InfoChip extends StatelessWidget {
         children: [
           Icon(icon, size: 13, color: context.colors.textSecondary),
           const SizedBox(width: 4),
-          Text(text, style: TextStyle(fontSize: 12, color: context.colors.textSecondary, fontWeight: FontWeight.w500)),
+          Text(text,
+              style: TextStyle(
+                  fontSize: 12,
+                  color: context.colors.textSecondary,
+                  fontWeight: FontWeight.w500)),
         ],
       ),
     );

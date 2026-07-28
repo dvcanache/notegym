@@ -1,11 +1,14 @@
+import 'dart:developer';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/theme.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/gradient_button.dart';
 import 'auth_provider.dart';
+import 'presentation/providers/auth_provider.dart' as firebase;
 import 'package:notegym/core/theme_extension.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -38,9 +41,40 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     setState(() => _isLoading = false);
   }
 
+  Future<void> _signInWithGoogle() async {
+    log('[LoginScreen] Google button clicked');
+    await ref.read(firebase.authControllerProvider.notifier).signInWithGoogle();
+    final loggedIn = ref.read(authProvider).isLoggedIn;
+    log('[LoginScreen] signInWithGoogle completed, isLoggedIn=$loggedIn');
+    if (loggedIn) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          log('[LoginScreen] Post-frame: navigating to /home');
+          GoRouter.of(context).go('/home');
+        }
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final authControllerState = ref.watch(firebase.authControllerProvider);
+    final isGoogleLoading = authControllerState.isLoading;
+
+    ref.listen<AsyncValue<void>>(firebase.authControllerProvider, (_, next) {
+      if (next is AsyncError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              next.error.toString(),
+              style: const TextStyle(color: Colors.white),
+            ),
+            backgroundColor: Colors.red.shade700,
+          ),
+        );
+      }
+    });
 
     return Scaffold(
       body: Stack(
@@ -49,7 +83,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFF0A0A1A), Color(0xFF1A0A2E), Color(0xFF0D0D1A)],
+                colors: [
+                  Color(0xFF0A0A1A),
+                  Color(0xFF1A0A2E),
+                  Color(0xFF0D0D1A)
+                ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -59,17 +97,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           Positioned(
             top: -80,
             left: -80,
-            child: _GlowOrb(color: context.colors.primary.withOpacity(0.25), size: 300),
+            child: _GlowOrb(
+                color: context.colors.primary.withValues(alpha: 0.25),
+                size: 300),
           ),
           Positioned(
             bottom: 80,
             right: -60,
-            child: _GlowOrb(color: context.colors.accent.withOpacity(0.2), size: 250),
+            child: _GlowOrb(
+                color: context.colors.accent.withValues(alpha: 0.2), size: 250),
           ),
           Positioned(
             top: size.height * 0.4,
             left: size.width * 0.5,
-            child: _GlowOrb(color: context.colors.primaryLight.withOpacity(0.1), size: 200),
+            child: _GlowOrb(
+                color: context.colors.primaryLight.withValues(alpha: 0.1),
+                size: 200),
           ),
 
           // Content
@@ -90,14 +133,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       borderRadius: BorderRadius.circular(22),
                       boxShadow: [
                         BoxShadow(
-                          color: context.colors.primary.withOpacity(0.4),
+                          color: context.colors.primary.withValues(alpha: 0.4),
                           blurRadius: 24,
                           spreadRadius: 2,
                         ),
                       ],
                     ),
-                    child: const Icon(Icons.fitness_center_rounded, color: Colors.white, size: 42),
-                  ).animate().fadeIn(delay: 100.ms).scale(begin: const Offset(0.7, 0.7)),
+                    child: const Icon(Icons.fitness_center_rounded,
+                        color: Colors.white, size: 42),
+                  )
+                      .animate()
+                      .fadeIn(delay: 100.ms)
+                      .scale(begin: const Offset(0.7, 0.7)),
 
                   const SizedBox(height: 24),
 
@@ -147,10 +194,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             style: TextStyle(color: context.colors.textPrimary),
                             decoration: InputDecoration(
                               labelText: 'Nombre',
-                              prefixIcon: Icon(Icons.person_outline, color: context.colors.textMuted),
+                              prefixIcon: Icon(Icons.person_outline,
+                                  color: context.colors.textMuted),
                             ),
-                            validator: (v) =>
-                                v == null || v.trim().isEmpty ? 'Ingresa tu nombre' : null,
+                            validator: (v) => v == null || v.trim().isEmpty
+                                ? 'Ingresa tu nombre'
+                                : null,
                           ),
 
                           const SizedBox(height: 16),
@@ -162,10 +211,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             style: TextStyle(color: context.colors.textPrimary),
                             decoration: InputDecoration(
                               labelText: 'Correo electrónico',
-                              prefixIcon: Icon(Icons.email_outlined, color: context.colors.textMuted),
+                              prefixIcon: Icon(Icons.email_outlined,
+                                  color: context.colors.textMuted),
                             ),
                             validator: (v) {
-                              if (v == null || v.isEmpty) return 'Ingresa tu correo';
+                              if (v == null || v.isEmpty)
+                                return 'Ingresa tu correo';
                               if (!v.contains('@')) return 'Correo inválido';
                               return null;
                             },
@@ -182,18 +233,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                           const SizedBox(height: 16),
 
-                          // Google button  (visual only for now)
                           OutlinedGlassButton(
                             label: 'Continuar con Google',
                             icon: Icons.g_mobiledata_rounded,
-                            onPressed: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('Google Sign-In disponible próximamente'),
-                                  backgroundColor: context.colors.primary,
-                                ),
-                              );
-                            },
+                            isLoading: isGoogleLoading,
+                            onPressed: isGoogleLoading ? null : _signInWithGoogle,
                           ),
                         ],
                       ),

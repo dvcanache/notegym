@@ -16,21 +16,35 @@ class WorkoutCompleteScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final log = ref.read(workoutLogsProvider.notifier).getById(logId);
     if (log == null) {
-      return Scaffold(body: Center(child: Text('Log no encontrado')));
+      return const Scaffold(body: Center(child: Text('Log no encontrado')));
     }
 
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Stack(
         children: [
-          Container(decoration: BoxDecoration(gradient: context.colors.backgroundGradient)),
+          Container(
+              decoration:
+                  BoxDecoration(gradient: context.colors.backgroundGradient)),
           Positioned(
-            top: -40, left: -40,
-            child: Container(width: 200, height: 200, decoration: BoxDecoration(shape: BoxShape.circle, color: context.colors.success.withOpacity(0.15))),
+            top: -40,
+            left: -40,
+            child: Container(
+                width: 200,
+                height: 200,
+                decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: context.colors.success.withValues(alpha: 0.15))),
           ),
           Positioned(
-            bottom: 80, right: -40,
-            child: Container(width: 150, height: 150, decoration: BoxDecoration(shape: BoxShape.circle, color: context.colors.accent.withOpacity(0.1))),
+            bottom: 80,
+            right: -40,
+            child: Container(
+                width: 150,
+                height: 150,
+                decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: context.colors.accent.withValues(alpha: 0.1))),
           ),
           SafeArea(
             child: Padding(
@@ -44,21 +58,39 @@ class WorkoutCompleteScreen extends ConsumerWidget {
                     height: 96,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      gradient: LinearGradient(colors: [context.colors.success, context.colors.success.withOpacity(0.6)]),
-                      boxShadow: [BoxShadow(color: context.colors.success.withOpacity(0.4), blurRadius: 30, spreadRadius: 5)],
+                      gradient: LinearGradient(colors: [
+                        context.colors.success,
+                        context.colors.success.withValues(alpha: 0.6)
+                      ]),
+                      boxShadow: [
+                        BoxShadow(
+                            color:
+                                context.colors.success.withValues(alpha: 0.4),
+                            blurRadius: 30,
+                            spreadRadius: 5)
+                      ],
                     ),
-                    child: const Icon(Icons.emoji_events_rounded, color: Colors.white, size: 52),
+                    child: const Icon(Icons.emoji_events_rounded,
+                        color: Colors.white, size: 52),
                   ).animate().scale(delay: 100.ms, curve: Curves.elasticOut),
 
                   const SizedBox(height: 24),
 
-                  Text('¡Entrenamiento Completado!',
-                    style: Theme.of(context).textTheme.displayMedium?.copyWith(fontWeight: FontWeight.w800),
+                  Text(
+                    '¡Entrenamiento Completado!',
+                    style: Theme.of(context)
+                        .textTheme
+                        .displayMedium
+                        ?.copyWith(fontWeight: FontWeight.w800),
                     textAlign: TextAlign.center,
                   ).animate().fadeIn(delay: 300.ms),
 
-                  Text(log.routineName,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: context.colors.textSecondary),
+                  Text(
+                    log.routineName,
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyLarge
+                        ?.copyWith(color: context.colors.textSecondary),
                     textAlign: TextAlign.center,
                   ).animate().fadeIn(delay: 400.ms),
 
@@ -70,11 +102,23 @@ class WorkoutCompleteScreen extends ConsumerWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        _Stat(label: 'Duración', value: log.durationFormatted, icon: Icons.timer_outlined, color: context.colors.primary),
+                        _Stat(
+                            label: 'Duración',
+                            value: log.durationFormatted,
+                            icon: Icons.timer_outlined,
+                            color: context.colors.primary),
                         _divider(context),
-                        _Stat(label: 'Series', value: '${log.totalSets}', icon: Icons.repeat_rounded, color: context.colors.accent),
+                        _Stat(
+                            label: 'Series',
+                            value: '${log.totalSets}',
+                            icon: Icons.repeat_rounded,
+                            color: context.colors.accent),
                         _divider(context),
-                        _Stat(label: 'Volumen', value: '${log.totalVolume.toStringAsFixed(0)}kg', icon: Icons.monitor_weight_outlined, color: context.colors.success),
+                        _Stat(
+                            label: 'Volumen',
+                            value: '${log.totalVolume.toStringAsFixed(0)}kg',
+                            icon: Icons.monitor_weight_outlined,
+                            color: context.colors.success),
                       ],
                     ),
                   ).animate().fadeIn(delay: 500.ms).slideY(begin: 0.2),
@@ -103,7 +147,8 @@ class WorkoutCompleteScreen extends ConsumerWidget {
     );
   }
 
-  Widget _divider(BuildContext context) => Container(width: 1, height: 48, color: context.colors.glassBorder);
+  Widget _divider(BuildContext context) =>
+      Container(width: 1, height: 48, color: context.colors.glassBorder);
 }
 
 class _Stat extends StatelessWidget {
@@ -112,7 +157,11 @@ class _Stat extends StatelessWidget {
   final IconData icon;
   final Color color;
 
-  const _Stat({required this.label, required this.value, required this.icon, required this.color});
+  const _Stat(
+      {required this.label,
+      required this.value,
+      required this.icon,
+      required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -120,9 +169,14 @@ class _Stat extends StatelessWidget {
       children: [
         Icon(icon, color: color, size: 22),
         const SizedBox(height: 8),
-        Text(value, style: TextStyle(color: context.colors.textPrimary, fontSize: 20, fontWeight: FontWeight.w700)),
+        Text(value,
+            style: TextStyle(
+                color: context.colors.textPrimary,
+                fontSize: 20,
+                fontWeight: FontWeight.w700)),
         const SizedBox(height: 2),
-        Text(label, style: TextStyle(color: context.colors.textMuted, fontSize: 11)),
+        Text(label,
+            style: TextStyle(color: context.colors.textMuted, fontSize: 11)),
       ],
     );
   }

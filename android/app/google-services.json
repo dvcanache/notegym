@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "168512024611",
+    "project_id": "progressaapp-489e9",
+    "storage_bucket": "progressaapp-489e9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:168512024611:android:02a729140644229d0d0196",
+        "android_client_info": {
+          "package_name": "dev.dvcanache.notegym"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBxv663LiWJJt6Uy1yKODgz7VqQCJVVj6Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

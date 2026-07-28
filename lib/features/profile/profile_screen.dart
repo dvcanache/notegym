@@ -5,6 +5,7 @@ import '../../core/theme.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/gradient_button.dart';
 import '../auth/auth_provider.dart';
+import '../auth/presentation/providers/auth_provider.dart' as firebase;
 import '../workout/workout_logs_provider.dart';
 import '../../models/user_profile.dart';
 import '../routines/excel/excel_export_service.dart';
@@ -38,8 +39,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     super.initState();
     final profile = ref.read(authProvider).profile;
     _nameCtrl = TextEditingController(text: profile?.name ?? '');
-    _weightCtrl = TextEditingController(text: profile?.weightKg?.toString() ?? '');
-    _heightCtrl = TextEditingController(text: profile?.heightCm?.toString() ?? '');
+    _weightCtrl =
+        TextEditingController(text: profile?.weightKg?.toString() ?? '');
+    _heightCtrl =
+        TextEditingController(text: profile?.heightCm?.toString() ?? '');
     _selectedGoal = profile?.goal;
   }
 
@@ -57,7 +60,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     final updated = UserProfile(
       id: profile.id,
-      name: _nameCtrl.text.trim().isNotEmpty ? _nameCtrl.text.trim() : profile.name,
+      name: _nameCtrl.text.trim().isNotEmpty
+          ? _nameCtrl.text.trim()
+          : profile.name,
       email: profile.email,
       photoUrl: profile.photoUrl,
       goal: _selectedGoal ?? profile.goal,
@@ -86,11 +91,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       backgroundColor: Colors.transparent,
       body: Stack(
         children: [
-          Container(decoration: BoxDecoration(gradient: context.colors.backgroundGradient)),
+          Container(
+              decoration:
+                  BoxDecoration(gradient: context.colors.backgroundGradient)),
           // Purple glow
           Positioned(
-            top: -80, right: -80,
-            child: Container(width: 250, height: 250, decoration: BoxDecoration(shape: BoxShape.circle, color: context.colors.primary.withOpacity(0.12))),
+            top: -80,
+            right: -80,
+            child: Container(
+                width: 250,
+                height: 250,
+                decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: context.colors.primary.withValues(alpha: 0.12))),
           ),
           SafeArea(
             child: SingleChildScrollView(
@@ -101,17 +114,24 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Perfil', style: Theme.of(context).textTheme.displayMedium),
+                      Text('Perfil',
+                          style: Theme.of(context).textTheme.displayMedium),
                       if (!_isEditing)
                         GlassCard(
                           onTap: () => setState(() => _isEditing = true),
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
                           borderRadius: 12,
                           child: Row(
                             children: [
-                              Icon(Icons.edit_outlined, size: 14, color: context.colors.primaryLight),
-                              SizedBox(width: 6),
-                              Text('Editar', style: TextStyle(color: context.colors.primaryLight, fontSize: 12, fontWeight: FontWeight.w600)),
+                              Icon(Icons.edit_outlined,
+                                  size: 14, color: context.colors.primaryLight),
+                              const SizedBox(width: 6),
+                              Text('Editar',
+                                  style: TextStyle(
+                                      color: context.colors.primaryLight,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600)),
                             ],
                           ),
                         ),
@@ -131,12 +151,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           decoration: BoxDecoration(
                             gradient: context.colors.purpleOrangeGradient,
                             shape: BoxShape.circle,
-                            boxShadow: [BoxShadow(color: context.colors.primary.withOpacity(0.3), blurRadius: 16)],
+                            boxShadow: [
+                              BoxShadow(
+                                  color: context.colors.primary
+                                      .withValues(alpha: 0.3),
+                                  blurRadius: 16)
+                            ],
                           ),
                           child: Center(
                             child: Text(
-                              profile.name.isNotEmpty ? profile.name[0].toUpperCase() : 'A',
-                              style: const TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.w700),
+                              profile.name.isNotEmpty
+                                  ? profile.name[0].toUpperCase()
+                                  : 'A',
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.w700),
                             ),
                           ),
                         ),
@@ -145,19 +175,30 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(profile.name, style: Theme.of(context).textTheme.headlineLarge),
+                              Text(profile.name,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineLarge),
                               const SizedBox(height: 2),
-                              Text(profile.email, style: TextStyle(color: context.colors.textMuted, fontSize: 12)),
+                              Text(profile.email,
+                                  style: TextStyle(
+                                      color: context.colors.textMuted,
+                                      fontSize: 12)),
                               const SizedBox(height: 6),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 3),
                                 decoration: BoxDecoration(
-                                  color: context.colors.accent.withOpacity(0.2),
+                                  color: context.colors.accent
+                                      .withValues(alpha: 0.2),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(
                                   '🔥 ${profile.currentStreak} días de racha',
-                                  style: TextStyle(color: context.colors.accent, fontSize: 11, fontWeight: FontWeight.w600),
+                                  style: TextStyle(
+                                      color: context.colors.accent,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600),
                                 ),
                               ),
                             ],
@@ -172,12 +213,27 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   // Stats
                   Row(
                     children: [
-                      Expanded(child: _StatCard2(value: '${profile.totalWorkouts}', label: 'Entrenamientos', icon: Icons.fitness_center_rounded, color: context.colors.primary)),
+                      Expanded(
+                          child: _StatCard2(
+                              value: '${profile.totalWorkouts}',
+                              label: 'Entrenamientos',
+                              icon: Icons.fitness_center_rounded,
+                              color: context.colors.primary)),
                       const SizedBox(width: 10),
-                      Expanded(child: _StatCard2(value: '${profile.bestStreak}d', label: 'Mejor racha', icon: Icons.emoji_events_rounded, color: context.colors.accent)),
+                      Expanded(
+                          child: _StatCard2(
+                              value: '${profile.bestStreak}d',
+                              label: 'Mejor racha',
+                              icon: Icons.emoji_events_rounded,
+                              color: context.colors.accent)),
                       const SizedBox(width: 10),
-                      Expanded(child: _StatCard2(
-                        value: logs.isEmpty ? '0kg' : '${logs.fold<double>(0, (s, l) => s + l.totalVolume).toStringAsFixed(0)}',
+                      Expanded(
+                          child: _StatCard2(
+                        value: logs.isEmpty
+                            ? '0kg'
+                            : logs
+                                .fold<double>(0, (s, l) => s + l.totalVolume)
+                                .toStringAsFixed(0),
                         label: 'Vol. total (kg)',
                         icon: Icons.monitor_weight_outlined,
                         color: context.colors.success,
@@ -194,68 +250,87 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Editar Perfil', style: Theme.of(context).textTheme.headlineMedium),
+                          Text('Editar Perfil',
+                              style:
+                                  Theme.of(context).textTheme.headlineMedium),
                           const SizedBox(height: 16),
-
                           TextField(
                             controller: _nameCtrl,
                             style: TextStyle(color: context.colors.textPrimary),
-                            decoration: const InputDecoration(labelText: 'Nombre'),
+                            decoration:
+                                const InputDecoration(labelText: 'Nombre'),
                           ),
-
                           const SizedBox(height: 12),
-
                           Row(
                             children: [
                               Expanded(
                                 child: TextField(
                                   controller: _weightCtrl,
-                                  style: TextStyle(color: context.colors.textPrimary),
+                                  style: TextStyle(
+                                      color: context.colors.textPrimary),
                                   keyboardType: TextInputType.number,
-                                  decoration: const InputDecoration(labelText: 'Peso (kg)'),
+                                  decoration: const InputDecoration(
+                                      labelText: 'Peso (kg)'),
                                 ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: TextField(
                                   controller: _heightCtrl,
-                                  style: TextStyle(color: context.colors.textPrimary),
+                                  style: TextStyle(
+                                      color: context.colors.textPrimary),
                                   keyboardType: TextInputType.number,
-                                  decoration: const InputDecoration(labelText: 'Altura (cm)'),
+                                  decoration: const InputDecoration(
+                                      labelText: 'Altura (cm)'),
                                 ),
                               ),
                             ],
                           ),
-
                           const SizedBox(height: 16),
-
-                          Text('Objetivo principal', style: Theme.of(context).textTheme.titleMedium),
+                          Text('Objetivo principal',
+                              style: Theme.of(context).textTheme.titleMedium),
                           const SizedBox(height: 10),
                           Wrap(
                             spacing: 8,
                             runSpacing: 8,
-                            children: _goals.map((g) => GestureDetector(
-                              onTap: () => setState(() => _selectedGoal = g),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: _selectedGoal == g ? context.colors.primary.withOpacity(0.3) : context.colors.glassWhite,
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: _selectedGoal == g ? Border.all(color: context.colors.primary) : null,
-                                ),
-                                child: Text(g, style: TextStyle(color: _selectedGoal == g ? context.colors.primaryLight : context.colors.textMuted, fontSize: 12)),
-                              ),
-                            )).toList(),
+                            children: _goals
+                                .map((g) => GestureDetector(
+                                      onTap: () =>
+                                          setState(() => _selectedGoal = g),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 12, vertical: 8),
+                                        decoration: BoxDecoration(
+                                          color: _selectedGoal == g
+                                              ? context.colors.primary
+                                                  .withValues(alpha: 0.3)
+                                              : context.colors.glassWhite,
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                          border: _selectedGoal == g
+                                              ? Border.all(
+                                                  color: context.colors.primary)
+                                              : null,
+                                        ),
+                                        child: Text(g,
+                                            style: TextStyle(
+                                                color: _selectedGoal == g
+                                                    ? context
+                                                        .colors.primaryLight
+                                                    : context.colors.textMuted,
+                                                fontSize: 12)),
+                                      ),
+                                    ))
+                                .toList(),
                           ),
-
                           const SizedBox(height: 20),
-
                           Row(
                             children: [
                               Expanded(
                                 child: OutlinedGlassButton(
                                   label: 'Cancelar',
-                                  onPressed: () => setState(() => _isEditing = false),
+                                  onPressed: () =>
+                                      setState(() => _isEditing = false),
                                 ),
                               ),
                               const SizedBox(width: 10),
@@ -272,30 +347,44 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                     ).animate().fadeIn(),
                     const SizedBox(height: 14),
-                  ]
-                  else if (profile.goal != null) ...[
+                  ] else if (profile.goal != null) ...[
                     GlassCard(
                       padding: const EdgeInsets.all(16),
                       child: Row(
                         children: [
-                          Icon(Icons.track_changes_rounded, color: context.colors.primaryLight, size: 20),
+                          Icon(Icons.track_changes_rounded,
+                              color: context.colors.primaryLight, size: 20),
                           const SizedBox(width: 10),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Objetivo', style: TextStyle(color: context.colors.textMuted, fontSize: 11)),
-                              Text(profile.goal!, style: Theme.of(context).textTheme.titleMedium),
+                              Text('Objetivo',
+                                  style: TextStyle(
+                                      color: context.colors.textMuted,
+                                      fontSize: 11)),
+                              Text(profile.goal!,
+                                  style:
+                                      Theme.of(context).textTheme.titleMedium),
                             ],
                           ),
-                          if (profile.weightKg != null || profile.heightCm != null) ...[
+                          if (profile.weightKg != null ||
+                              profile.heightCm != null) ...[
                             const Spacer(),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 if (profile.weightKg != null)
-                                  Text('${profile.weightKg?.toStringAsFixed(0)} kg', style: TextStyle(color: context.colors.textPrimary, fontWeight: FontWeight.w600)),
+                                  Text(
+                                      '${profile.weightKg?.toStringAsFixed(0)} kg',
+                                      style: TextStyle(
+                                          color: context.colors.textPrimary,
+                                          fontWeight: FontWeight.w600)),
                                 if (profile.heightCm != null)
-                                  Text('${profile.heightCm?.toStringAsFixed(0)} cm', style: TextStyle(color: context.colors.textMuted, fontSize: 12)),
+                                  Text(
+                                      '${profile.heightCm?.toStringAsFixed(0)} cm',
+                                      style: TextStyle(
+                                          color: context.colors.textMuted,
+                                          fontSize: 12)),
                               ],
                             ),
                           ]
@@ -313,19 +402,36 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.palette_outlined, color: context.colors.primaryLight, size: 20),
+                            Icon(Icons.palette_outlined,
+                                color: context.colors.primaryLight, size: 20),
                             const SizedBox(width: 10),
-                            Text('Apariencia', style: Theme.of(context).textTheme.titleMedium),
+                            Text('Apariencia',
+                                style: Theme.of(context).textTheme.titleMedium),
                           ],
                         ),
                         const SizedBox(height: 16),
                         Row(
                           children: [
-                            Expanded(child: _ThemeModeOption(mode: ThemeMode.system, current: themeMode, icon: Icons.brightness_auto_rounded, label: 'Sistema')),
+                            Expanded(
+                                child: _ThemeModeOption(
+                                    mode: ThemeMode.system,
+                                    current: themeMode,
+                                    icon: Icons.brightness_auto_rounded,
+                                    label: 'Sistema')),
                             const SizedBox(width: 8),
-                            Expanded(child: _ThemeModeOption(mode: ThemeMode.light, current: themeMode, icon: Icons.light_mode_rounded, label: 'Claro')),
+                            Expanded(
+                                child: _ThemeModeOption(
+                                    mode: ThemeMode.light,
+                                    current: themeMode,
+                                    icon: Icons.light_mode_rounded,
+                                    label: 'Claro')),
                             const SizedBox(width: 8),
-                            Expanded(child: _ThemeModeOption(mode: ThemeMode.dark, current: themeMode, icon: Icons.dark_mode_rounded, label: 'Oscuro')),
+                            Expanded(
+                                child: _ThemeModeOption(
+                                    mode: ThemeMode.dark,
+                                    current: themeMode,
+                                    icon: Icons.dark_mode_rounded,
+                                    label: 'Oscuro')),
                           ],
                         ),
                       ],
@@ -343,22 +449,30 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: context.colors.accent.withOpacity(0.2),
+                            color: context.colors.accent.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: Icon(Icons.download_outlined, color: context.colors.accent, size: 20),
+                          child: Icon(Icons.download_outlined,
+                              color: context.colors.accent, size: 20),
                         ),
                         const SizedBox(width: 14),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Descargar Plantilla Excel', style: TextStyle(color: context.colors.textPrimary, fontWeight: FontWeight.w600)),
-                              Text('Plantilla para importar rutinas (.xlsx)', style: TextStyle(color: context.colors.textMuted, fontSize: 12)),
+                              Text('Descargar Plantilla Excel',
+                                  style: TextStyle(
+                                      color: context.colors.textPrimary,
+                                      fontWeight: FontWeight.w600)),
+                              Text('Plantilla para importar rutinas (.xlsx)',
+                                  style: TextStyle(
+                                      color: context.colors.textMuted,
+                                      fontSize: 12)),
                             ],
                           ),
                         ),
-                        Icon(Icons.chevron_right_rounded, color: context.colors.textMuted),
+                        Icon(Icons.chevron_right_rounded,
+                            color: context.colors.textMuted),
                       ],
                     ),
                   ).animate().fadeIn(delay: 500.ms),
@@ -371,9 +485,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     padding: const EdgeInsets.all(16),
                     child: Row(
                       children: [
-                        Icon(Icons.logout_rounded, color: context.colors.error, size: 20),
-                        SizedBox(width: 14),
-                        Text('Cerrar Sesión', style: TextStyle(color: context.colors.error, fontWeight: FontWeight.w600)),
+                        Icon(Icons.logout_rounded,
+                            color: context.colors.error, size: 20),
+                        const SizedBox(width: 14),
+                        Text('Cerrar Sesión',
+                            style: TextStyle(
+                                color: context.colors.error,
+                                fontWeight: FontWeight.w600)),
                       ],
                     ),
                   ).animate().fadeIn(delay: 600.ms),
@@ -391,16 +509,24 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: context.colors.surface,
-        title: Text('¿Cerrar sesión?', style: TextStyle(color: context.colors.textPrimary)),
-        content: Text('Tus datos locales se mantendrán', style: TextStyle(color: context.colors.textSecondary)),
+        title: Text('¿Cerrar sesión?',
+            style: TextStyle(color: context.colors.textPrimary)),
+        content: Text('Tus datos locales se mantendrán',
+            style: TextStyle(color: context.colors.textSecondary)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text('Cancelar', style: TextStyle(color: context.colors.primaryLight))),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text('Salir', style: TextStyle(color: context.colors.error))),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text('Cancelar',
+                  style: TextStyle(color: context.colors.primaryLight))),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child:
+                  Text('Salir', style: TextStyle(color: context.colors.error))),
         ],
       ),
     );
     if (confirmed == true) {
-      await ref.read(authProvider.notifier).signOut();
+      await ref.read(firebase.authControllerProvider.notifier).signOut();
     }
   }
 }
@@ -411,7 +537,11 @@ class _StatCard2 extends StatelessWidget {
   final IconData icon;
   final Color color;
 
-  const _StatCard2({required this.value, required this.label, required this.icon, required this.color});
+  const _StatCard2(
+      {required this.value,
+      required this.label,
+      required this.icon,
+      required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -422,8 +552,14 @@ class _StatCard2 extends StatelessWidget {
         children: [
           Icon(icon, color: color, size: 18),
           const SizedBox(height: 8),
-          Text(value, style: TextStyle(color: context.colors.textPrimary, fontSize: 20, fontWeight: FontWeight.w700)),
-          Text(label, style: TextStyle(color: context.colors.textMuted, fontSize: 10), maxLines: 2),
+          Text(value,
+              style: TextStyle(
+                  color: context.colors.textPrimary,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700)),
+          Text(label,
+              style: TextStyle(color: context.colors.textMuted, fontSize: 10),
+              maxLines: 2),
         ],
       ),
     );
@@ -436,7 +572,11 @@ class _ThemeModeOption extends ConsumerWidget {
   final IconData icon;
   final String label;
 
-  const _ThemeModeOption({required this.mode, required this.current, required this.icon, required this.label});
+  const _ThemeModeOption(
+      {required this.mode,
+      required this.current,
+      required this.icon,
+      required this.label});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -446,15 +586,29 @@ class _ThemeModeOption extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: selected ? context.colors.primary.withOpacity(0.2) : context.colors.glassWhite,
+          color: selected
+              ? context.colors.primary.withValues(alpha: 0.2)
+              : context.colors.glassWhite,
           borderRadius: BorderRadius.circular(10),
-          border: selected ? Border.all(color: context.colors.primary) : Border.all(color: Colors.transparent),
+          border: selected
+              ? Border.all(color: context.colors.primary)
+              : Border.all(color: Colors.transparent),
         ),
         child: Column(
           children: [
-            Icon(icon, size: 22, color: selected ? context.colors.primaryLight : context.colors.textMuted),
+            Icon(icon,
+                size: 22,
+                color: selected
+                    ? context.colors.primaryLight
+                    : context.colors.textMuted),
             const SizedBox(height: 8),
-            Text(label, style: TextStyle(color: selected ? context.colors.primaryLight : context.colors.textMuted, fontSize: 12, fontWeight: FontWeight.w600)),
+            Text(label,
+                style: TextStyle(
+                    color: selected
+                        ? context.colors.primaryLight
+                        : context.colors.textMuted,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600)),
           ],
         ),
       ),

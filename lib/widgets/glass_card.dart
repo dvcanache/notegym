@@ -51,7 +51,7 @@ class GlassCard extends StatelessWidget {
               boxShadow: shadows ??
                   [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
+                      color: Colors.black.withValues(alpha: 0.2),
                       blurRadius: 20,
                       spreadRadius: 0,
                     ),
@@ -88,7 +88,8 @@ class GlassIconButton extends StatelessWidget {
       child: GlassCard(
         padding: const EdgeInsets.all(10),
         borderRadius: 12,
-        child: Icon(icon, color: iconColor ?? context.colors.textPrimary, size: size),
+        child: Icon(icon,
+            color: iconColor ?? context.colors.textPrimary, size: size),
       ),
     );
   }

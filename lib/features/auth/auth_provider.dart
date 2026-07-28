@@ -80,6 +80,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(profile: updated);
   }
 
+  Future<void> signInWithProfile(UserProfile profile) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_profileKey, jsonEncode(profile.toJson()));
+    state = AuthState(isLoggedIn: true, profile: profile);
+  }
+
   Future<void> signOut() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_profileKey);

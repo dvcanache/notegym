@@ -1,12 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:firebase_core/firebase_core.dart'; // <--- 1. Importar Firebase Core
+import 'firebase_options.dart'; // <--- 2. Importar las opciones generadas
+
 import 'core/theme.dart';
 import 'core/theme_provider.dart';
 import 'core/router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 3. Inicializar Firebase según la plataforma actual (Windows, Android, etc.)
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   await initializeDateFormatting('es', null);
   runApp(const ProviderScope(child: NoteGymApp()));
 }

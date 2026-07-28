@@ -42,7 +42,7 @@ class GradientButton extends StatelessWidget {
           boxShadow: onPressed != null
               ? [
                   BoxShadow(
-                    color: context.colors.primary.withOpacity(0.35),
+                    color: context.colors.primary.withValues(alpha: 0.35),
                     blurRadius: 16,
                     spreadRadius: 0,
                     offset: const Offset(0, 4),
@@ -89,6 +89,7 @@ class OutlinedGlassButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final IconData? icon;
   final Color? color;
+  final bool isLoading;
 
   const OutlinedGlassButton({
     super.key,
@@ -96,37 +97,49 @@ class OutlinedGlassButton extends StatelessWidget {
     this.onPressed,
     this.icon,
     this.color,
+    this.isLoading = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final c = color ?? context.colors.primary;
     return GestureDetector(
-      onTap: onPressed,
+      onTap: isLoading ? null : onPressed,
       child: Container(
         height: 48,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: c.withOpacity(0.6), width: 1.5),
-          color: c.withOpacity(0.08),
+          border: Border.all(color: c.withValues(alpha: 0.6), width: 1.5),
+          color: c.withValues(alpha: 0.08),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (icon != null) ...[
-              Icon(icon, color: c, size: 18),
-              const SizedBox(width: 8),
-            ],
-            Text(
-              label,
-              style: TextStyle(
-                color: c,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
+        child: isLoading
+            ? const Center(
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                ),
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (icon != null) ...[
+                    Icon(icon, color: c, size: 18),
+                    const SizedBox(width: 8),
+                  ],
+                  Text(
+                    label,
+                    style: TextStyle(
+                      color: c,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
       ),
     );
   }

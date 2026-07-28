@@ -45,7 +45,8 @@ class _RoutinesScreenState extends ConsumerState<RoutinesScreen>
       body: Stack(
         children: [
           Container(
-            decoration: BoxDecoration(gradient: context.colors.backgroundGradient),
+            decoration:
+                BoxDecoration(gradient: context.colors.backgroundGradient),
           ),
           SafeArea(
             child: Column(
@@ -57,18 +58,25 @@ class _RoutinesScreenState extends ConsumerState<RoutinesScreen>
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Rutinas', style: Theme.of(context).textTheme.displayMedium),
+                      Text('Rutinas',
+                          style: Theme.of(context).textTheme.displayMedium),
                       Row(
                         children: [
                           GlassCard(
                             onTap: () => _importExcel(context),
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 8),
                             borderRadius: 12,
                             child: Row(
                               children: [
-                                Icon(Icons.upload_file_outlined, color: context.colors.accent, size: 16),
-                                SizedBox(width: 6),
-                                Text('Importar', style: TextStyle(color: context.colors.accent, fontSize: 12, fontWeight: FontWeight.w600)),
+                                Icon(Icons.upload_file_outlined,
+                                    color: context.colors.accent, size: 16),
+                                const SizedBox(width: 6),
+                                Text('Importar',
+                                    style: TextStyle(
+                                        color: context.colors.accent,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600)),
                               ],
                             ),
                           ),
@@ -77,7 +85,8 @@ class _RoutinesScreenState extends ConsumerState<RoutinesScreen>
                             onTap: () => context.go('/routines/create'),
                             padding: const EdgeInsets.all(10),
                             borderRadius: 12,
-                            child: Icon(Icons.add_rounded, color: context.colors.primaryLight, size: 20),
+                            child: Icon(Icons.add_rounded,
+                                color: context.colors.primaryLight, size: 20),
                           ),
                         ],
                       ),
@@ -95,12 +104,15 @@ class _RoutinesScreenState extends ConsumerState<RoutinesScreen>
                     borderRadius: 14,
                     child: Row(
                       children: [
-                        Icon(Icons.search_rounded, color: context.colors.textMuted, size: 20),
+                        Icon(Icons.search_rounded,
+                            color: context.colors.textMuted, size: 20),
                         const SizedBox(width: 10),
                         Expanded(
                           child: TextField(
                             controller: _searchCtrl,
-                            style: TextStyle(color: context.colors.textPrimary, fontSize: 14),
+                            style: TextStyle(
+                                color: context.colors.textPrimary,
+                                fontSize: 14),
                             onChanged: (v) => setState(() => _search = v),
                             decoration: const InputDecoration(
                               hintText: 'Buscar rutina...',
@@ -108,7 +120,8 @@ class _RoutinesScreenState extends ConsumerState<RoutinesScreen>
                               enabledBorder: InputBorder.none,
                               focusedBorder: InputBorder.none,
                               filled: false,
-                              contentPadding: EdgeInsets.symmetric(vertical: 12),
+                              contentPadding:
+                                  EdgeInsets.symmetric(vertical: 12),
                             ),
                           ),
                         ),
@@ -118,7 +131,8 @@ class _RoutinesScreenState extends ConsumerState<RoutinesScreen>
                               _searchCtrl.clear();
                               setState(() => _search = '');
                             },
-                            child: Icon(Icons.close_rounded, color: context.colors.textMuted, size: 18),
+                            child: Icon(Icons.close_rounded,
+                                color: context.colors.textMuted, size: 18),
                           ),
                       ],
                     ),
@@ -143,8 +157,10 @@ class _RoutinesScreenState extends ConsumerState<RoutinesScreen>
                       dividerColor: Colors.transparent,
                       labelColor: Colors.white,
                       unselectedLabelColor: context.colors.textMuted,
-                      labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-                      unselectedLabelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
+                      labelStyle: const TextStyle(
+                          fontSize: 13, fontWeight: FontWeight.w600),
+                      unselectedLabelStyle: const TextStyle(
+                          fontSize: 13, fontWeight: FontWeight.w400),
                       tabs: [
                         Tab(text: 'Predeterminadas (${defaults.length})'),
                         Tab(text: 'Mis Rutinas (${custom.length})'),
@@ -166,8 +182,11 @@ class _RoutinesScreenState extends ConsumerState<RoutinesScreen>
                       ),
                       _RoutineList(
                         routines: _filtered(custom),
-                        emptyMessage: 'No has creado rutinas todavía.\nToca + para crear una.',
-                        onDelete: (id) => ref.read(routinesProvider.notifier).deleteRoutine(id),
+                        emptyMessage:
+                            'No has creado rutinas todavía.\nToca + para crear una.',
+                        onDelete: (id) => ref
+                            .read(routinesProvider.notifier)
+                            .deleteRoutine(id),
                       ),
                     ],
                   ),
@@ -182,9 +201,11 @@ class _RoutinesScreenState extends ConsumerState<RoutinesScreen>
 
   List<Routine> _filtered(List<Routine> list) {
     if (_search.isEmpty) return list;
-    return list.where((r) =>
-        r.name.toLowerCase().contains(_search.toLowerCase()) ||
-        r.description.toLowerCase().contains(_search.toLowerCase())).toList();
+    return list
+        .where((r) =>
+            r.name.toLowerCase().contains(_search.toLowerCase()) ||
+            r.description.toLowerCase().contains(_search.toLowerCase()))
+        .toList();
   }
 
   Future<void> _importExcel(BuildContext context) async {
@@ -219,7 +240,8 @@ class _RoutineList extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.fitness_center_outlined, color: context.colors.textMuted, size: 52),
+            Icon(Icons.fitness_center_outlined,
+                color: context.colors.textMuted, size: 52),
             const SizedBox(height: 16),
             Text(
               emptyMessage,
@@ -253,11 +275,16 @@ class _RoutineCard extends StatelessWidget {
 
   Color _typeColor(BuildContext context, String type) {
     switch (type) {
-      case 'hiit': return context.colors.accent;
-      case 'cardio': return context.colors.success;
-      case 'yoga': return const Color(0xFF06B6D4);
-      case 'flexibility': return const Color(0xFF84CC16);
-      default: return context.colors.primary;
+      case 'hiit':
+        return context.colors.accent;
+      case 'cardio':
+        return context.colors.success;
+      case 'yoga':
+        return const Color(0xFF06B6D4);
+      case 'flexibility':
+        return const Color(0xFF84CC16);
+      default:
+        return context.colors.primary;
     }
   }
 
@@ -273,9 +300,9 @@ class _RoutineCard extends StatelessWidget {
             width: 56,
             height: 56,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.2),
+              color: color.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: color.withOpacity(0.3)),
+              border: Border.all(color: color.withValues(alpha: 0.3)),
             ),
             child: Center(
               child: Text(routine.emoji, style: const TextStyle(fontSize: 28)),
@@ -295,7 +322,10 @@ class _RoutineCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   routine.description,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.copyWith(fontSize: 12),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -304,9 +334,13 @@ class _RoutineCard extends StatelessWidget {
                   children: [
                     _TagChip(text: routine.difficulty, color: color),
                     const SizedBox(width: 6),
-                    _TagChip(text: '${routine.estimatedMinutes}min', color: context.colors.textMuted),
+                    _TagChip(
+                        text: '${routine.estimatedMinutes}min',
+                        color: context.colors.textMuted),
                     const SizedBox(width: 6),
-                    _TagChip(text: '${routine.exercises.length} ejerc.', color: context.colors.textMuted),
+                    _TagChip(
+                        text: '${routine.exercises.length} ejerc.',
+                        color: context.colors.textMuted),
                   ],
                 ),
               ],
@@ -315,14 +349,22 @@ class _RoutineCard extends StatelessWidget {
           if (onDelete != null)
             PopupMenuButton<String>(
               color: context.colors.surface,
-              icon: Icon(Icons.more_vert_rounded, color: context.colors.textMuted, size: 20),
+              icon: Icon(Icons.more_vert_rounded,
+                  color: context.colors.textMuted, size: 20),
               onSelected: (val) {
                 if (val == 'delete') onDelete!(routine.id);
-                if (val == 'edit') context.go('/routines/create', extra: {'id': routine.id});
+                if (val == 'edit')
+                  context.go('/routines/create', extra: {'id': routine.id});
               },
               itemBuilder: (_) => [
-                PopupMenuItem(value: 'edit', child: Text('Editar', style: TextStyle(color: context.colors.textPrimary))),
-                PopupMenuItem(value: 'delete', child: Text('Eliminar', style: TextStyle(color: context.colors.error))),
+                PopupMenuItem(
+                    value: 'edit',
+                    child: Text('Editar',
+                        style: TextStyle(color: context.colors.textPrimary))),
+                PopupMenuItem(
+                    value: 'delete',
+                    child: Text('Eliminar',
+                        style: TextStyle(color: context.colors.error))),
               ],
             ),
         ],
@@ -341,12 +383,13 @@ class _TagChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
         text,
-        style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.w600),
+        style:
+            TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.w600),
       ),
     );
   }

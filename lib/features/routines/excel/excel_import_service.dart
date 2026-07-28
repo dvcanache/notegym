@@ -9,7 +9,7 @@ import '../../../models/routine.dart';
 import 'package:notegym/core/theme_extension.dart';
 
 class ExcelImportService {
-  static final _uuid = const Uuid();
+  static const _uuid = Uuid();
 
   /// Shows file picker and imports a routine from .xlsx
   static Future<Routine?> importRoutine(BuildContext context) async {
@@ -48,9 +48,8 @@ class ExcelImportService {
       }
 
       // Get routine name from first row or filename
-      String routineName = result.files.first.name
-          .replaceAll('.xlsx', '')
-          .replaceAll('_', ' ');
+      String routineName =
+          result.files.first.name.replaceAll('.xlsx', '').replaceAll('_', ' ');
 
       // Parse exercises (skip header row)
       final exercises = <Exercise>[];
@@ -62,7 +61,9 @@ class ExcelImportService {
         final row = rows[i];
         if (row.isNotEmpty) {
           final cell = row[0]?.value?.toString().toLowerCase() ?? '';
-          if (cell.contains('ejerc') || cell.contains('nombre') || cell.contains('exercise')) {
+          if (cell.contains('ejerc') ||
+              cell.contains('nombre') ||
+              cell.contains('exercise')) {
             startRow = i + 1;
             break;
           }
@@ -76,11 +77,21 @@ class ExcelImportService {
         final name = row[0]?.value?.toString().trim() ?? '';
         if (name.isEmpty) continue;
 
-        final muscle = row.length > 1 ? row[1]?.value?.toString().trim() ?? 'Full Body' : 'Full Body';
-        final sets = int.tryParse(row.length > 2 ? row[2]?.value?.toString() ?? '3' : '3') ?? 3;
-        final reps = int.tryParse(row.length > 3 ? row[3]?.value?.toString() ?? '10' : '10') ?? 10;
-        final weight = double.tryParse(row.length > 4 ? row[4]?.value?.toString() ?? '0' : '0') ?? 0;
-        final rest = int.tryParse(row.length > 5 ? row[5]?.value?.toString() ?? '60' : '60') ?? 60;
+        final muscle = row.length > 1
+            ? row[1]?.value?.toString().trim() ?? 'Full Body'
+            : 'Full Body';
+        final sets = int.tryParse(
+                row.length > 2 ? row[2]?.value?.toString() ?? '3' : '3') ??
+            3;
+        final reps = int.tryParse(
+                row.length > 3 ? row[3]?.value?.toString() ?? '10' : '10') ??
+            10;
+        final weight = double.tryParse(
+                row.length > 4 ? row[4]?.value?.toString() ?? '0' : '0') ??
+            0;
+        final rest = int.tryParse(
+                row.length > 5 ? row[5]?.value?.toString() ?? '60' : '60') ??
+            60;
 
         exercises.add(Exercise(
           id: _uuid.v4(),
@@ -102,7 +113,8 @@ class ExcelImportService {
 
       // Show preview dialog
       if (context.mounted) {
-        final confirmed = await _showPreviewDialog(context, routineName, exercises);
+        final confirmed =
+            await _showPreviewDialog(context, routineName, exercises);
         if (!confirmed) return null;
       }
 
@@ -132,7 +144,8 @@ class ExcelImportService {
           context: context,
           builder: (ctx) => Dialog(
             backgroundColor: context.colors.surface,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             child: Padding(
               padding: const EdgeInsets.all(24),
               child: Column(
@@ -145,7 +158,9 @@ class ExcelImportService {
                   Text('Rutina: $name',
                       style: TextStyle(color: context.colors.textSecondary)),
                   Text('${exercises.length} ejercicios encontrados',
-                      style: TextStyle(color: context.colors.accent, fontWeight: FontWeight.w600)),
+                      style: TextStyle(
+                          color: context.colors.accent,
+                          fontWeight: FontWeight.w600)),
                   const SizedBox(height: 16),
                   SizedBox(
                     height: 200,
@@ -157,11 +172,15 @@ class ExcelImportService {
                           padding: const EdgeInsets.only(bottom: 6),
                           child: Row(
                             children: [
-                              Text('${i + 1}. ', style: TextStyle(color: context.colors.textMuted)),
+                              Text('${i + 1}. ',
+                                  style: TextStyle(
+                                      color: context.colors.textMuted)),
                               Expanded(
                                 child: Text(
                                   '${ex.name} • ${ex.defaultSets}×${ex.defaultReps}',
-                                  style: TextStyle(color: context.colors.textPrimary, fontSize: 13),
+                                  style: TextStyle(
+                                      color: context.colors.textPrimary,
+                                      fontSize: 13),
                                 ),
                               ),
                             ],
@@ -176,14 +195,17 @@ class ExcelImportService {
                       Expanded(
                         child: TextButton(
                           onPressed: () => Navigator.pop(ctx, false),
-                          child: Text('Cancelar', style: TextStyle(color: context.colors.textMuted)),
+                          child: Text('Cancelar',
+                              style:
+                                  TextStyle(color: context.colors.textMuted)),
                         ),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () => Navigator.pop(ctx, true),
-                          style: ElevatedButton.styleFrom(backgroundColor: context.colors.primary),
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: context.colors.primary),
                           child: const Text('Importar'),
                         ),
                       ),

@@ -23,21 +23,27 @@ class ProgressScreen extends ConsumerWidget {
       backgroundColor: Colors.transparent,
       body: Stack(
         children: [
-          Container(decoration: BoxDecoration(gradient: context.colors.backgroundGradient)),
+          Container(
+              decoration:
+                  BoxDecoration(gradient: context.colors.backgroundGradient)),
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Progreso', style: Theme.of(context).textTheme.displayMedium)
-                      .animate().fadeIn(delay: 100.ms),
+                  Text('Progreso',
+                          style: Theme.of(context).textTheme.displayMedium)
+                      .animate()
+                      .fadeIn(delay: 100.ms),
 
                   const SizedBox(height: 24),
 
                   // Weekly frequency
-                  Text('Frecuencia Semanal', style: Theme.of(context).textTheme.headlineMedium)
-                      .animate().fadeIn(delay: 200.ms),
+                  Text('Frecuencia Semanal',
+                          style: Theme.of(context).textTheme.headlineMedium)
+                      .animate()
+                      .fadeIn(delay: 200.ms),
                   const SizedBox(height: 12),
 
                   GlassCard(
@@ -45,14 +51,22 @@ class ProgressScreen extends ConsumerWidget {
                     child: weekData.every((v) => v == 0)
                         ? SizedBox(
                             height: 140,
-                            child: Center(child: Text('Completa entrenamientos para ver estadísticas', style: TextStyle(color: context.colors.textMuted), textAlign: TextAlign.center)),
+                            child: Center(
+                                child: Text(
+                                    'Completa entrenamientos para ver estadísticas',
+                                    style: TextStyle(
+                                        color: context.colors.textMuted),
+                                    textAlign: TextAlign.center)),
                           )
                         : SizedBox(
                             height: 150,
                             child: BarChart(
                               BarChartData(
                                 alignment: BarChartAlignment.spaceAround,
-                                maxY: (weekData.reduce((a, b) => a > b ? a : b).toDouble() + 1),
+                                maxY: (weekData
+                                        .reduce((a, b) => a > b ? a : b)
+                                        .toDouble() +
+                                    1),
                                 barTouchData: BarTouchData(enabled: false),
                                 titlesData: FlTitlesData(
                                   show: true,
@@ -60,31 +74,62 @@ class ProgressScreen extends ConsumerWidget {
                                     sideTitles: SideTitles(
                                       showTitles: true,
                                       getTitlesWidget: (v, _) {
-                                        const days = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
-                                        return Text(days[v.toInt()], style: TextStyle(color: context.colors.textMuted, fontSize: 11));
+                                        const days = [
+                                          'L',
+                                          'M',
+                                          'X',
+                                          'J',
+                                          'V',
+                                          'S',
+                                          'D'
+                                        ];
+                                        return Text(days[v.toInt()],
+                                            style: TextStyle(
+                                                color: context.colors.textMuted,
+                                                fontSize: 11));
                                       },
                                     ),
                                   ),
-                                  leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                                  topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                                  rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                                  leftTitles: const AxisTitles(
+                                      sideTitles:
+                                          SideTitles(showTitles: false)),
+                                  topTitles: const AxisTitles(
+                                      sideTitles:
+                                          SideTitles(showTitles: false)),
+                                  rightTitles: const AxisTitles(
+                                      sideTitles:
+                                          SideTitles(showTitles: false)),
                                 ),
-                                gridData: FlGridData(show: false),
+                                gridData: const FlGridData(show: false),
                                 borderData: FlBorderData(show: false),
-                                barGroups: weekData.asMap().entries.map((e) => BarChartGroupData(
-                                  x: e.key,
-                                  barRods: [BarChartRodData(
-                                    toY: e.value.toDouble(),
-                                    gradient: context.colors.primaryGradient,
-                                    width: 20,
-                                    borderRadius: BorderRadius.circular(6),
-                                    backDrawRodData: BackgroundBarChartRodData(
-                                      show: true,
-                                      toY: (weekData.reduce((a, b) => a > b ? a : b).toDouble() + 1),
-                                      color: context.colors.glassWhite,
-                                    ),
-                                  )],
-                                )).toList(),
+                                barGroups: weekData
+                                    .asMap()
+                                    .entries
+                                    .map((e) => BarChartGroupData(
+                                          x: e.key,
+                                          barRods: [
+                                            BarChartRodData(
+                                              toY: e.value.toDouble(),
+                                              gradient: context
+                                                  .colors.primaryGradient,
+                                              width: 20,
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                              backDrawRodData:
+                                                  BackgroundBarChartRodData(
+                                                show: true,
+                                                toY: (weekData
+                                                        .reduce((a, b) =>
+                                                            a > b ? a : b)
+                                                        .toDouble() +
+                                                    1),
+                                                color:
+                                                    context.colors.glassWhite,
+                                              ),
+                                            )
+                                          ],
+                                        ))
+                                    .toList(),
                               ),
                             ),
                           ),
@@ -93,8 +138,10 @@ class ProgressScreen extends ConsumerWidget {
                   const SizedBox(height: 24),
 
                   // Volume last 4 weeks
-                  Text('Volumen Semanal (kg)', style: Theme.of(context).textTheme.headlineMedium)
-                      .animate().fadeIn(delay: 400.ms),
+                  Text('Volumen Semanal (kg)',
+                          style: Theme.of(context).textTheme.headlineMedium)
+                      .animate()
+                      .fadeIn(delay: 400.ms),
                   const SizedBox(height: 12),
 
                   GlassCard(
@@ -102,7 +149,10 @@ class ProgressScreen extends ConsumerWidget {
                     child: volumeData.every((v) => v == 0)
                         ? SizedBox(
                             height: 140,
-                            child: Center(child: Text('Sin datos de volumen todavía', style: TextStyle(color: context.colors.textMuted))),
+                            child: Center(
+                                child: Text('Sin datos de volumen todavía',
+                                    style: TextStyle(
+                                        color: context.colors.textMuted))),
                           )
                         : SizedBox(
                             height: 150,
@@ -111,7 +161,9 @@ class ProgressScreen extends ConsumerWidget {
                                 gridData: FlGridData(
                                   show: true,
                                   drawVerticalLine: false,
-                                  getDrawingHorizontalLine: (_) => FlLine(color: context.colors.glassBorder, strokeWidth: 0.5),
+                                  getDrawingHorizontalLine: (_) => FlLine(
+                                      color: context.colors.glassBorder,
+                                      strokeWidth: 0.5),
                                 ),
                                 titlesData: FlTitlesData(
                                   bottomTitles: AxisTitles(
@@ -120,28 +172,43 @@ class ProgressScreen extends ConsumerWidget {
                                       getTitlesWidget: (v, _) {
                                         const labels = ['S4', 'S3', 'S2', 'S1'];
                                         if (v.toInt() < labels.length) {
-                                          return Text(labels[v.toInt()], style: TextStyle(color: context.colors.textMuted, fontSize: 11));
+                                          return Text(labels[v.toInt()],
+                                              style: TextStyle(
+                                                  color:
+                                                      context.colors.textMuted,
+                                                  fontSize: 11));
                                         }
                                         return const Text('');
                                       },
                                     ),
                                   ),
-                                  leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                                  topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                                  rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                                  leftTitles: const AxisTitles(
+                                      sideTitles:
+                                          SideTitles(showTitles: false)),
+                                  topTitles: const AxisTitles(
+                                      sideTitles:
+                                          SideTitles(showTitles: false)),
+                                  rightTitles: const AxisTitles(
+                                      sideTitles:
+                                          SideTitles(showTitles: false)),
                                 ),
                                 borderData: FlBorderData(show: false),
                                 lineBarsData: [
                                   LineChartBarData(
-                                    spots: volumeData.asMap().entries
-                                        .map((e) => FlSpot(e.key.toDouble(), e.value.toDouble()))
+                                    spots: volumeData
+                                        .asMap()
+                                        .entries
+                                        .map((e) => FlSpot(e.key.toDouble(),
+                                            e.value.toDouble()))
                                         .toList(),
                                     isCurved: true,
-                                    gradient: context.colors.purpleOrangeGradient,
+                                    gradient:
+                                        context.colors.purpleOrangeGradient,
                                     barWidth: 3,
                                     dotData: FlDotData(
                                       show: true,
-                                      getDotPainter: (_, __, ___, ____) => FlDotCirclePainter(
+                                      getDotPainter: (_, __, ___, ____) =>
+                                          FlDotCirclePainter(
                                         radius: 4,
                                         color: context.colors.accent,
                                         strokeWidth: 2,
@@ -151,7 +218,12 @@ class ProgressScreen extends ConsumerWidget {
                                     belowBarData: BarAreaData(
                                       show: true,
                                       gradient: LinearGradient(
-                                        colors: [context.colors.primary.withOpacity(0.3), context.colors.accent.withOpacity(0)],
+                                        colors: [
+                                          context.colors.primary
+                                              .withValues(alpha: 0.3),
+                                          context.colors.accent
+                                              .withValues(alpha: 0)
+                                        ],
                                         begin: Alignment.topCenter,
                                         end: Alignment.bottomCenter,
                                       ),
@@ -166,44 +238,70 @@ class ProgressScreen extends ConsumerWidget {
                   const SizedBox(height: 24),
 
                   // Personal Records
-                  Text('Récords Personales (PRs)', style: Theme.of(context).textTheme.headlineMedium)
-                      .animate().fadeIn(delay: 600.ms),
+                  Text('Récords Personales (PRs)',
+                          style: Theme.of(context).textTheme.headlineMedium)
+                      .animate()
+                      .fadeIn(delay: 600.ms),
                   const SizedBox(height: 12),
 
                   if (prs.isEmpty)
                     GlassCard(
                       padding: const EdgeInsets.all(24),
                       child: Center(
-                        child: Text('Completa entrenamientos para ver tus PRs', style: TextStyle(color: context.colors.textMuted), textAlign: TextAlign.center),
+                        child: Text('Completa entrenamientos para ver tus PRs',
+                            style: TextStyle(color: context.colors.textMuted),
+                            textAlign: TextAlign.center),
                       ),
                     )
                   else
-                    ...prs.entries.take(10).toList().asMap().entries.map((e) => Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: GlassCard(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: context.colors.accent.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text('PR', style: TextStyle(color: context.colors.accent, fontWeight: FontWeight.w700, fontSize: 11)),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(e.value.key, style: Theme.of(context).textTheme.titleMedium, maxLines: 1, overflow: TextOverflow.ellipsis),
-                            ),
-                            Text(
-                              e.value.value > 0 ? '${e.value.value.toStringAsFixed(1)} kg' : 'BW',
-                              style: TextStyle(color: context.colors.accent, fontWeight: FontWeight.w700, fontSize: 16),
-                            ),
-                          ],
-                        ),
-                      ).animate().fadeIn(delay: (700 + e.key * 60).ms),
-                    )),
+                    ...prs.entries
+                        .take(10)
+                        .toList()
+                        .asMap()
+                        .entries
+                        .map((e) => Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: GlassCard(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 12),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: context.colors.accent
+                                            .withValues(alpha: 0.2),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text('PR',
+                                          style: TextStyle(
+                                              color: context.colors.accent,
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 11)),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(e.value.key,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleMedium,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis),
+                                    ),
+                                    Text(
+                                      e.value.value > 0
+                                          ? '${e.value.value.toStringAsFixed(1)} kg'
+                                          : 'BW',
+                                      style: TextStyle(
+                                          color: context.colors.accent,
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 16),
+                                    ),
+                                  ],
+                                ),
+                              ).animate().fadeIn(delay: (700 + e.key * 60).ms),
+                            )),
                 ],
               ),
             ),
@@ -231,7 +329,8 @@ class ProgressScreen extends ConsumerWidget {
   List<double> _getWeeklyVolume(List<WorkoutLog> logs) {
     final now = DateTime.now();
     return List.generate(4, (i) {
-      final weekStart = now.subtract(Duration(days: (3 - i) * 7 + now.weekday - 1));
+      final weekStart =
+          now.subtract(Duration(days: (3 - i) * 7 + now.weekday - 1));
       final weekEnd = weekStart.add(const Duration(days: 7));
       return logs
           .where((l) => l.date.isAfter(weekStart) && l.date.isBefore(weekEnd))

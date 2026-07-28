@@ -32,7 +32,8 @@ class HomeScreen extends ConsumerWidget {
         children: [
           // Background gradient
           Container(
-            decoration: BoxDecoration(gradient: context.colors.backgroundGradient),
+            decoration:
+                BoxDecoration(gradient: context.colors.backgroundGradient),
           ),
           // Purple glow top
           Positioned(
@@ -43,7 +44,7 @@ class HomeScreen extends ConsumerWidget {
               height: 250,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: context.colors.primary.withOpacity(0.15),
+                color: context.colors.primary.withValues(alpha: 0.15),
               ),
             ),
           ),
@@ -61,11 +62,16 @@ class HomeScreen extends ConsumerWidget {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(greeting, style: Theme.of(context).textTheme.bodyMedium),
+                              Text(greeting,
+                                  style:
+                                      Theme.of(context).textTheme.bodyMedium),
                               const SizedBox(height: 2),
                               Text(
                                 profile?.name ?? 'Atleta',
-                                style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .displayMedium
+                                    ?.copyWith(
                                       fontWeight: FontWeight.w700,
                                     ),
                               ),
@@ -74,7 +80,9 @@ class HomeScreen extends ConsumerWidget {
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodyMedium
-                                    ?.copyWith(color: context.colors.textMuted, fontSize: 12),
+                                    ?.copyWith(
+                                        color: context.colors.textMuted,
+                                        fontSize: 12),
                               ),
                             ],
                           ),
@@ -88,7 +96,8 @@ class HomeScreen extends ConsumerWidget {
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: context.colors.primary.withOpacity(0.3),
+                                    color: context.colors.primary
+                                        .withValues(alpha: 0.3),
                                     blurRadius: 12,
                                   ),
                                 ],
@@ -121,7 +130,10 @@ class HomeScreen extends ConsumerWidget {
                               value: '${weekLogs.length}',
                               icon: Icons.calendar_today_rounded,
                               color: context.colors.primary,
-                            ).animate().fadeIn(delay: 200.ms).slideX(begin: -0.2),
+                            )
+                                .animate()
+                                .fadeIn(delay: 200.ms)
+                                .slideX(begin: -0.2),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
@@ -130,7 +142,10 @@ class HomeScreen extends ConsumerWidget {
                               value: '${profile?.currentStreak ?? 0} días',
                               icon: Icons.local_fire_department_rounded,
                               color: context.colors.accent,
-                            ).animate().fadeIn(delay: 300.ms).slideX(begin: 0.2),
+                            )
+                                .animate()
+                                .fadeIn(delay: 300.ms)
+                                .slideX(begin: 0.2),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
@@ -139,7 +154,10 @@ class HomeScreen extends ConsumerWidget {
                               value: '${profile?.totalWorkouts ?? 0}',
                               icon: Icons.fitness_center_rounded,
                               color: context.colors.success,
-                            ).animate().fadeIn(delay: 400.ms).slideX(begin: 0.2),
+                            )
+                                .animate()
+                                .fadeIn(delay: 400.ms)
+                                .slideX(begin: 0.2),
                           ),
                         ],
                       ),
@@ -165,7 +183,9 @@ class HomeScreen extends ConsumerWidget {
                             onPressed: () => context.go('/routines'),
                             child: Text(
                               'Ver todas',
-                              style: TextStyle(color: context.colors.primaryLight, fontSize: 13),
+                              style: TextStyle(
+                                  color: context.colors.primaryLight,
+                                  fontSize: 13),
                             ),
                           ),
                         ],
@@ -174,7 +194,13 @@ class HomeScreen extends ConsumerWidget {
                       const SizedBox(height: 12),
 
                       // Routine cards (first 3 defaults)
-                      ...routines.where((r) => r.isDefault).take(3).toList().asMap().entries.map(
+                      ...routines
+                          .where((r) => r.isDefault)
+                          .take(3)
+                          .toList()
+                          .asMap()
+                          .entries
+                          .map(
                             (e) => Padding(
                               padding: const EdgeInsets.only(bottom: 12),
                               child: _QuickRoutineCard(
@@ -232,7 +258,7 @@ class _StatCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.2),
+              color: color.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, color: color, size: 16),
@@ -303,20 +329,29 @@ class _WeekDayTracker extends StatelessWidget {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      gradient: hasLog ? context.colors.purpleOrangeGradient : null,
-                      color: hasLog ? null : (isToday ? context.colors.primary.withOpacity(0.2) : context.colors.glassWhite),
+                      gradient:
+                          hasLog ? context.colors.purpleOrangeGradient : null,
+                      color: hasLog
+                          ? null
+                          : (isToday
+                              ? context.colors.primary.withValues(alpha: 0.2)
+                              : context.colors.glassWhite),
                       shape: BoxShape.circle,
                       border: isToday && !hasLog
-                          ? Border.all(color: context.colors.primary, width: 1.5)
+                          ? Border.all(
+                              color: context.colors.primary, width: 1.5)
                           : null,
                     ),
                     child: Center(
                       child: hasLog
-                          ? const Icon(Icons.check_rounded, color: Colors.white, size: 16)
+                          ? const Icon(Icons.check_rounded,
+                              color: Colors.white, size: 16)
                           : Text(
                               days[i],
                               style: TextStyle(
-                                color: isToday ? context.colors.primaryLight : context.colors.textMuted,
+                                color: isToday
+                                    ? context.colors.primaryLight
+                                    : context.colors.textMuted,
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -328,7 +363,9 @@ class _WeekDayTracker extends StatelessWidget {
                     '${day.day}',
                     style: TextStyle(
                       fontSize: 10,
-                      color: isToday ? context.colors.primaryLight : context.colors.textMuted,
+                      color: isToday
+                          ? context.colors.primaryLight
+                          : context.colors.textMuted,
                       fontWeight: isToday ? FontWeight.w600 : FontWeight.w400,
                     ),
                   ),
@@ -383,9 +420,11 @@ class _QuickRoutineCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    _chip(context, Icons.timer_outlined, '${routine.estimatedMinutes}min'),
+                    _chip(context, Icons.timer_outlined,
+                        '${routine.estimatedMinutes}min'),
                     const SizedBox(width: 8),
-                    _chip(context, Icons.fitness_center_outlined, '${routine.exercises.length} ejercicios'),
+                    _chip(context, Icons.fitness_center_outlined,
+                        '${routine.exercises.length} ejercicios'),
                   ],
                 ),
               ],
@@ -395,10 +434,11 @@ class _QuickRoutineCard extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: context.colors.primary.withOpacity(0.2),
+              color: context.colors.primary.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(Icons.play_arrow_rounded, color: context.colors.primaryLight, size: 20),
+            child: Icon(Icons.play_arrow_rounded,
+                color: context.colors.primaryLight, size: 20),
           ),
         ],
       ),
@@ -410,7 +450,8 @@ class _QuickRoutineCard extends StatelessWidget {
       children: [
         Icon(icon, size: 12, color: context.colors.textMuted),
         const SizedBox(width: 4),
-        Text(text, style: TextStyle(fontSize: 11, color: context.colors.textMuted)),
+        Text(text,
+            style: TextStyle(fontSize: 11, color: context.colors.textMuted)),
       ],
     );
   }

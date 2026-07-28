@@ -17,7 +17,8 @@ class CreateRoutineScreen extends ConsumerStatefulWidget {
   const CreateRoutineScreen({super.key, this.editingRoutineId});
 
   @override
-  ConsumerState<CreateRoutineScreen> createState() => _CreateRoutineScreenState();
+  ConsumerState<CreateRoutineScreen> createState() =>
+      _CreateRoutineScreenState();
 }
 
 class _CreateRoutineScreenState extends ConsumerState<CreateRoutineScreen> {
@@ -32,7 +33,13 @@ class _CreateRoutineScreenState extends ConsumerState<CreateRoutineScreen> {
   bool _isLoading = false;
 
   final _emojis = ['💪', '🔥', '⚡', '🏋️', '🧘', '🤸', '🏃', '🍑', '🦾', '📋'];
-  final _types = {'strength': 'Fuerza', 'cardio': 'Cardio', 'hiit': 'HIIT', 'yoga': 'Yoga', 'flexibility': 'Flexibilidad'};
+  final _types = {
+    'strength': 'Fuerza',
+    'cardio': 'Cardio',
+    'hiit': 'HIIT',
+    'yoga': 'Yoga',
+    'flexibility': 'Flexibilidad'
+  };
   final _difficulties = ['Principiante', 'Intermedio', 'Avanzado'];
 
   @override
@@ -40,7 +47,9 @@ class _CreateRoutineScreenState extends ConsumerState<CreateRoutineScreen> {
     super.initState();
     if (widget.editingRoutineId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        final routine = ref.read(routinesProvider.notifier).getById(widget.editingRoutineId!);
+        final routine = ref
+            .read(routinesProvider.notifier)
+            .getById(widget.editingRoutineId!);
         if (routine != null) _loadRoutine(routine);
       });
     }
@@ -69,14 +78,17 @@ class _CreateRoutineScreenState extends ConsumerState<CreateRoutineScreen> {
     if (!_formKey.currentState!.validate()) return;
     if (_exercises.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Añade al menos un ejercicio'), backgroundColor: context.colors.error),
+        SnackBar(
+            content: const Text('Añade al menos un ejercicio'),
+            backgroundColor: context.colors.error),
       );
       return;
     }
     setState(() => _isLoading = true);
 
     if (widget.editingRoutineId != null) {
-      final existing = ref.read(routinesProvider.notifier).getById(widget.editingRoutineId!);
+      final existing =
+          ref.read(routinesProvider.notifier).getById(widget.editingRoutineId!);
       if (existing != null) {
         await ref.read(routinesProvider.notifier).updateRoutine(
               existing.copyWith(
@@ -114,7 +126,9 @@ class _CreateRoutineScreenState extends ConsumerState<CreateRoutineScreen> {
       backgroundColor: Colors.transparent,
       body: Stack(
         children: [
-          Container(decoration: BoxDecoration(gradient: context.colors.backgroundGradient)),
+          Container(
+              decoration:
+                  BoxDecoration(gradient: context.colors.backgroundGradient)),
           SafeArea(
             child: Column(
               children: [
@@ -127,9 +141,10 @@ class _CreateRoutineScreenState extends ConsumerState<CreateRoutineScreen> {
                       GestureDetector(
                         onTap: () => context.pop(),
                         child: GlassCard(
-                          padding: EdgeInsets.all(10),
+                          padding: const EdgeInsets.all(10),
                           borderRadius: 12,
-                          child: Icon(Icons.close_rounded, color: context.colors.textPrimary, size: 20),
+                          child: Icon(Icons.close_rounded,
+                              color: context.colors.textPrimary, size: 20),
                         ),
                       ),
                       Text(isEditing ? 'Editar Rutina' : 'Nueva Rutina',
@@ -137,10 +152,16 @@ class _CreateRoutineScreenState extends ConsumerState<CreateRoutineScreen> {
                       GestureDetector(
                         onTap: _save,
                         child: GlassCard(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 8),
                           borderRadius: 12,
-                          backgroundColor: context.colors.primary.withOpacity(0.3),
-                          child: Text('Guardar', style: TextStyle(color: context.colors.primaryLight, fontWeight: FontWeight.w600, fontSize: 13)),
+                          backgroundColor:
+                              context.colors.primary.withValues(alpha: 0.3),
+                          child: Text('Guardar',
+                              style: TextStyle(
+                                  color: context.colors.primaryLight,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 13)),
                         ),
                       ),
                     ],
@@ -162,27 +183,40 @@ class _CreateRoutineScreenState extends ConsumerState<CreateRoutineScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Emoji', style: Theme.of(context).textTheme.titleMedium),
+                                Text('Emoji',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium),
                                 const SizedBox(height: 12),
                                 Wrap(
                                   spacing: 8,
-                                  children: _emojis.map((e) => GestureDetector(
-                                    onTap: () => setState(() => _emoji = e),
-                                    child: Container(
-                                      width: 44,
-                                      height: 44,
-                                      decoration: BoxDecoration(
-                                        color: _emoji == e
-                                            ? context.colors.primary.withOpacity(0.3)
-                                            : context.colors.glassWhite,
-                                        borderRadius: BorderRadius.circular(10),
-                                        border: _emoji == e
-                                            ? Border.all(color: context.colors.primary)
-                                            : null,
-                                      ),
-                                      child: Center(child: Text(e, style: const TextStyle(fontSize: 22))),
-                                    ),
-                                  )).toList(),
+                                  children: _emojis
+                                      .map((e) => GestureDetector(
+                                            onTap: () =>
+                                                setState(() => _emoji = e),
+                                            child: Container(
+                                              width: 44,
+                                              height: 44,
+                                              decoration: BoxDecoration(
+                                                color: _emoji == e
+                                                    ? context.colors.primary
+                                                        .withValues(alpha: 0.3)
+                                                    : context.colors.glassWhite,
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                                border: _emoji == e
+                                                    ? Border.all(
+                                                        color: context
+                                                            .colors.primary)
+                                                    : null,
+                                              ),
+                                              child: Center(
+                                                  child: Text(e,
+                                                      style: const TextStyle(
+                                                          fontSize: 22))),
+                                            ),
+                                          ))
+                                      .toList(),
                                 ),
                               ],
                             ),
@@ -197,16 +231,22 @@ class _CreateRoutineScreenState extends ConsumerState<CreateRoutineScreen> {
                               children: [
                                 TextFormField(
                                   controller: _nameCtrl,
-                                  style: TextStyle(color: context.colors.textPrimary),
-                                  decoration: const InputDecoration(labelText: 'Nombre de la rutina'),
-                                  validator: (v) => v == null || v.isEmpty ? 'Campo requerido' : null,
+                                  style: TextStyle(
+                                      color: context.colors.textPrimary),
+                                  decoration: const InputDecoration(
+                                      labelText: 'Nombre de la rutina'),
+                                  validator: (v) => v == null || v.isEmpty
+                                      ? 'Campo requerido'
+                                      : null,
                                 ),
                                 const SizedBox(height: 12),
                                 TextFormField(
                                   controller: _descCtrl,
-                                  style: TextStyle(color: context.colors.textPrimary),
+                                  style: TextStyle(
+                                      color: context.colors.textPrimary),
                                   maxLines: 2,
-                                  decoration: const InputDecoration(labelText: 'Descripción (opcional)'),
+                                  decoration: const InputDecoration(
+                                      labelText: 'Descripción (opcional)'),
                                 ),
                               ],
                             ),
@@ -220,59 +260,112 @@ class _CreateRoutineScreenState extends ConsumerState<CreateRoutineScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Tipo de entrenamiento', style: Theme.of(context).textTheme.titleMedium),
+                                Text('Tipo de entrenamiento',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium),
                                 const SizedBox(height: 10),
                                 Wrap(
                                   spacing: 8,
                                   runSpacing: 8,
-                                  children: _types.entries.map((e) => GestureDetector(
-                                    onTap: () => setState(() => _type = e.key),
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                                      decoration: BoxDecoration(
-                                        color: _type == e.key ? context.colors.primary.withOpacity(0.3) : context.colors.glassWhite,
-                                        borderRadius: BorderRadius.circular(10),
-                                        border: _type == e.key ? Border.all(color: context.colors.primary) : null,
-                                      ),
-                                      child: Text(e.value, style: TextStyle(
-                                        color: _type == e.key ? context.colors.primaryLight : context.colors.textSecondary,
-                                        fontWeight: FontWeight.w500, fontSize: 13,
-                                      )),
-                                    ),
-                                  )).toList(),
+                                  children: _types.entries
+                                      .map((e) => GestureDetector(
+                                            onTap: () =>
+                                                setState(() => _type = e.key),
+                                            child: Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 14,
+                                                      vertical: 8),
+                                              decoration: BoxDecoration(
+                                                color: _type == e.key
+                                                    ? context.colors.primary
+                                                        .withValues(alpha: 0.3)
+                                                    : context.colors.glassWhite,
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                                border: _type == e.key
+                                                    ? Border.all(
+                                                        color: context
+                                                            .colors.primary)
+                                                    : null,
+                                              ),
+                                              child: Text(e.value,
+                                                  style: TextStyle(
+                                                    color: _type == e.key
+                                                        ? context
+                                                            .colors.primaryLight
+                                                        : context.colors
+                                                            .textSecondary,
+                                                    fontWeight: FontWeight.w500,
+                                                    fontSize: 13,
+                                                  )),
+                                            ),
+                                          ))
+                                      .toList(),
                                 ),
-
                                 const SizedBox(height: 16),
-                                Text('Dificultad', style: Theme.of(context).textTheme.titleMedium),
+                                Text('Dificultad',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium),
                                 const SizedBox(height: 10),
                                 Row(
-                                  children: _difficulties.map((d) => Expanded(
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(right: 6),
-                                      child: GestureDetector(
-                                        onTap: () => setState(() => _difficulty = d),
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(vertical: 8),
-                                          decoration: BoxDecoration(
-                                            color: _difficulty == d ? context.colors.accent.withOpacity(0.2) : context.colors.glassWhite,
-                                            borderRadius: BorderRadius.circular(10),
-                                            border: _difficulty == d ? Border.all(color: context.colors.accent) : null,
-                                          ),
-                                          child: Center(child: Text(d, style: TextStyle(
-                                            color: _difficulty == d ? context.colors.accent : context.colors.textMuted,
-                                            fontSize: 12, fontWeight: FontWeight.w500,
-                                          ))),
-                                        ),
-                                      ),
-                                    ),
-                                  )).toList(),
+                                  children: _difficulties
+                                      .map((d) => Expanded(
+                                            child: Padding(
+                                              padding: const EdgeInsets.only(
+                                                  right: 6),
+                                              child: GestureDetector(
+                                                onTap: () => setState(
+                                                    () => _difficulty = d),
+                                                child: Container(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(vertical: 8),
+                                                  decoration: BoxDecoration(
+                                                    color: _difficulty == d
+                                                        ? context.colors.accent
+                                                            .withValues(
+                                                                alpha: 0.2)
+                                                        : context
+                                                            .colors.glassWhite,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10),
+                                                    border: _difficulty == d
+                                                        ? Border.all(
+                                                            color: context
+                                                                .colors.accent)
+                                                        : null,
+                                                  ),
+                                                  child: Center(
+                                                      child: Text(d,
+                                                          style: TextStyle(
+                                                            color: _difficulty ==
+                                                                    d
+                                                                ? context.colors
+                                                                    .accent
+                                                                : context.colors
+                                                                    .textMuted,
+                                                            fontSize: 12,
+                                                            fontWeight:
+                                                                FontWeight.w500,
+                                                          ))),
+                                                ),
+                                              ),
+                                            ),
+                                          ))
+                                      .toList(),
                                 ),
-
                                 const SizedBox(height: 16),
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text('Duración estimada: ${_minutes}min', style: Theme.of(context).textTheme.titleMedium),
+                                    Text('Duración estimada: ${_minutes}min',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium),
                                   ],
                                 ),
                                 Slider(
@@ -282,7 +375,8 @@ class _CreateRoutineScreenState extends ConsumerState<CreateRoutineScreen> {
                                   divisions: 22,
                                   activeColor: context.colors.primary,
                                   inactiveColor: context.colors.glassWhite,
-                                  onChanged: (v) => setState(() => _minutes = v.round()),
+                                  onChanged: (v) =>
+                                      setState(() => _minutes = v.round()),
                                 ),
                               ],
                             ),
@@ -294,18 +388,30 @@ class _CreateRoutineScreenState extends ConsumerState<CreateRoutineScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text('Ejercicios (${_exercises.length})', style: Theme.of(context).textTheme.headlineMedium),
+                              Text('Ejercicios (${_exercises.length})',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineMedium),
                               GestureDetector(
                                 onTap: _showExercisePicker,
                                 child: GlassCard(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 8),
                                   borderRadius: 10,
-                                  backgroundColor: context.colors.primary.withOpacity(0.2),
+                                  backgroundColor: context.colors.primary
+                                      .withValues(alpha: 0.2),
                                   child: Row(
                                     children: [
-                                      Icon(Icons.add_rounded, color: context.colors.primaryLight, size: 16),
-                                      SizedBox(width: 4),
-                                      Text('Añadir', style: TextStyle(color: context.colors.primaryLight, fontSize: 12, fontWeight: FontWeight.w600)),
+                                      Icon(Icons.add_rounded,
+                                          color: context.colors.primaryLight,
+                                          size: 16),
+                                      const SizedBox(width: 4),
+                                      Text('Añadir',
+                                          style: TextStyle(
+                                              color:
+                                                  context.colors.primaryLight,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600)),
                                     ],
                                   ),
                                 ),
@@ -321,26 +427,36 @@ class _CreateRoutineScreenState extends ConsumerState<CreateRoutineScreen> {
                               child: Center(
                                 child: Column(
                                   children: [
-                                    Icon(Icons.add_circle_outline_rounded, color: context.colors.textMuted, size: 40),
+                                    Icon(Icons.add_circle_outline_rounded,
+                                        color: context.colors.textMuted,
+                                        size: 40),
                                     const SizedBox(height: 8),
-                                    Text('Toca "Añadir" para agregar ejercicios', style: TextStyle(color: context.colors.textMuted)),
+                                    Text(
+                                        'Toca "Añadir" para agregar ejercicios',
+                                        style: TextStyle(
+                                            color: context.colors.textMuted)),
                                   ],
                                 ),
                               ),
                             ),
 
-                          ..._exercises.asMap().entries.map((e) => _ExerciseEditCard(
-                            exercise: e.value,
-                            index: e.key,
-                            onRemove: () => setState(() => _exercises.removeAt(e.key)),
-                            onEdit: (updated) => setState(() => _exercises[e.key] = updated),
-                          )),
+                          ..._exercises.asMap().entries.map((e) =>
+                              _ExerciseEditCard(
+                                exercise: e.value,
+                                index: e.key,
+                                onRemove: () =>
+                                    setState(() => _exercises.removeAt(e.key)),
+                                onEdit: (updated) =>
+                                    setState(() => _exercises[e.key] = updated),
+                              )),
 
                           const SizedBox(height: 24),
 
                           if (_exercises.isNotEmpty)
                             GradientButton(
-                              label: isEditing ? 'Guardar Cambios' : 'Crear Rutina',
+                              label: isEditing
+                                  ? 'Guardar Cambios'
+                                  : 'Crear Rutina',
                               icon: Icons.check_rounded,
                               onPressed: _save,
                               isLoading: _isLoading,
@@ -368,7 +484,8 @@ class _CreateRoutineScreenState extends ConsumerState<CreateRoutineScreen> {
       context: context,
       backgroundColor: context.colors.surface,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setBS) => DraggableScrollableSheet(
           initialChildSize: 0.85,
@@ -379,31 +496,38 @@ class _CreateRoutineScreenState extends ConsumerState<CreateRoutineScreen> {
             children: [
               Container(
                 margin: const EdgeInsets.only(top: 12, bottom: 16),
-                width: 40, height: 4,
-                decoration: BoxDecoration(color: context.colors.glassBorder, borderRadius: BorderRadius.circular(2)),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                    color: context.colors.glassBorder,
+                    borderRadius: BorderRadius.circular(2)),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Seleccionar ejercicio', style: Theme.of(context).textTheme.headlineMedium),
+                    Text('Seleccionar ejercicio',
+                        style: Theme.of(context).textTheme.headlineMedium),
                     const SizedBox(height: 12),
                     TextField(
                       style: TextStyle(color: context.colors.textPrimary),
                       onChanged: (v) => setBS(() => search = v),
                       decoration: InputDecoration(
                         hintText: 'Buscar...',
-                        prefixIcon: Icon(Icons.search_rounded, color: context.colors.textMuted),
+                        prefixIcon: Icon(Icons.search_rounded,
+                            color: context.colors.textMuted),
                         filled: true,
                         fillColor: context.colors.glassWhite,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: context.colors.glassBorder),
+                          borderSide:
+                              BorderSide(color: context.colors.glassBorder),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: context.colors.glassBorder),
+                          borderSide:
+                              BorderSide(color: context.colors.glassBorder),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -420,32 +544,52 @@ class _CreateRoutineScreenState extends ConsumerState<CreateRoutineScreen> {
                   controller: ctrl,
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   itemCount: library
-                      .where((e) => e.name.toLowerCase().contains(search.toLowerCase()) ||
-                          e.muscleGroup.toLowerCase().contains(search.toLowerCase()))
+                      .where((e) =>
+                          e.name.toLowerCase().contains(search.toLowerCase()) ||
+                          e.muscleGroup
+                              .toLowerCase()
+                              .contains(search.toLowerCase()))
                       .length,
                   itemBuilder: (_, i) {
                     final filtered = library
-                        .where((e) => e.name.toLowerCase().contains(search.toLowerCase()) ||
-                            e.muscleGroup.toLowerCase().contains(search.toLowerCase()))
+                        .where((e) =>
+                            e.name
+                                .toLowerCase()
+                                .contains(search.toLowerCase()) ||
+                            e.muscleGroup
+                                .toLowerCase()
+                                .contains(search.toLowerCase()))
                         .toList();
                     final ex = filtered[i];
                     return ListTile(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 0, vertical: 4),
                       leading: Container(
                         width: 42,
                         height: 42,
                         decoration: BoxDecoration(
-                          color: (context.colors.muscleColors[ex.muscleGroup] ?? context.colors.primary).withOpacity(0.2),
+                          color: (context.colors.muscleColors[ex.muscleGroup] ??
+                                  context.colors.primary)
+                              .withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Icon(Icons.fitness_center_rounded,
-                          color: context.colors.muscleColors[ex.muscleGroup] ?? context.colors.primary, size: 18),
+                            color:
+                                context.colors.muscleColors[ex.muscleGroup] ??
+                                    context.colors.primary,
+                            size: 18),
                       ),
-                      title: Text(ex.name, style: TextStyle(color: context.colors.textPrimary, fontSize: 14)),
-                      subtitle: Text(ex.muscleGroup, style: TextStyle(color: context.colors.textMuted, fontSize: 12)),
-                      trailing: Icon(Icons.add_circle_outline_rounded, color: context.colors.primaryLight),
+                      title: Text(ex.name,
+                          style: TextStyle(
+                              color: context.colors.textPrimary, fontSize: 14)),
+                      subtitle: Text(ex.muscleGroup,
+                          style: TextStyle(
+                              color: context.colors.textMuted, fontSize: 12)),
+                      trailing: Icon(Icons.add_circle_outline_rounded,
+                          color: context.colors.primaryLight),
                       onTap: () {
-                        setState(() => _exercises.add(ex.copyWith(id: const Uuid().v4())));
+                        setState(() =>
+                            _exercises.add(ex.copyWith(id: const Uuid().v4())));
                         Navigator.pop(ctx);
                       },
                     );
@@ -487,19 +631,29 @@ class _ExerciseEditCard extends StatelessWidget {
                   width: 32,
                   height: 32,
                   decoration: BoxDecoration(
-                    color: (context.colors.muscleColors[exercise.muscleGroup] ?? context.colors.primary).withOpacity(0.2),
+                    color: (context.colors.muscleColors[exercise.muscleGroup] ??
+                            context.colors.primary)
+                        .withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Center(child: Text('${index + 1}', style: TextStyle(
-                    color: context.colors.muscleColors[exercise.muscleGroup] ?? context.colors.primary,
-                    fontWeight: FontWeight.w700, fontSize: 13,
-                  ))),
+                  child: Center(
+                      child: Text('${index + 1}',
+                          style: TextStyle(
+                            color: context.colors
+                                    .muscleColors[exercise.muscleGroup] ??
+                                context.colors.primary,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                          ))),
                 ),
                 const SizedBox(width: 10),
-                Expanded(child: Text(exercise.name, style: Theme.of(context).textTheme.titleMedium)),
+                Expanded(
+                    child: Text(exercise.name,
+                        style: Theme.of(context).textTheme.titleMedium)),
                 GestureDetector(
                   onTap: onRemove,
-                  child: Icon(Icons.delete_outline_rounded, color: context.colors.error, size: 20),
+                  child: Icon(Icons.delete_outline_rounded,
+                      color: context.colors.error, size: 20),
                 ),
               ],
             ),
@@ -521,7 +675,8 @@ class _ExerciseEditCard extends StatelessWidget {
                 _NumInput(
                   label: 'Peso (kg)',
                   value: exercise.defaultWeight.toInt(),
-                  onChanged: (v) => onEdit(exercise.copyWith(defaultWeight: v.toDouble())),
+                  onChanged: (v) =>
+                      onEdit(exercise.copyWith(defaultWeight: v.toDouble())),
                 ),
                 const SizedBox(width: 8),
                 _NumInput(
@@ -543,7 +698,8 @@ class _NumInput extends StatelessWidget {
   final int value;
   final ValueChanged<int> onChanged;
 
-  const _NumInput({required this.label, required this.value, required this.onChanged});
+  const _NumInput(
+      {required this.label, required this.value, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -559,14 +715,24 @@ class _NumInput extends StatelessWidget {
           children: [
             GestureDetector(
               onTap: () => onChanged(value + 1),
-              child: Icon(Icons.keyboard_arrow_up_rounded, size: 16, color: context.colors.textSecondary),
+              child: Icon(Icons.keyboard_arrow_up_rounded,
+                  size: 16, color: context.colors.textSecondary),
             ),
-            Text('$value', style: TextStyle(color: context.colors.textPrimary, fontWeight: FontWeight.w600, fontSize: 14)),
+            Text('$value',
+                style: TextStyle(
+                    color: context.colors.textPrimary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14)),
             GestureDetector(
-              onTap: () { if (value > 0) onChanged(value - 1); },
-              child: Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: context.colors.textSecondary),
+              onTap: () {
+                if (value > 0) onChanged(value - 1);
+              },
+              child: Icon(Icons.keyboard_arrow_down_rounded,
+                  size: 16, color: context.colors.textSecondary),
             ),
-            Text(label, style: TextStyle(fontSize: 9, color: context.colors.textMuted), textAlign: TextAlign.center),
+            Text(label,
+                style: TextStyle(fontSize: 9, color: context.colors.textMuted),
+                textAlign: TextAlign.center),
           ],
         ),
       ),

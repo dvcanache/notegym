@@ -9,13 +9,15 @@ import '../../../models/routine.dart';
 import 'package:notegym/core/theme_extension.dart';
 
 class ExcelExportService {
-  static Future<void> exportRoutine(BuildContext context, Routine routine) async {
+  static Future<void> exportRoutine(
+      BuildContext context, Routine routine) async {
     try {
       final excel = Excel.createExcel();
 
       // Sheet 1: Routine Info
       final infoSheet = excel['Información'];
-      _addCell(infoSheet, 0, 0, 'NoteGym - Exportación de Rutina', bold: true, size: 14);
+      _addCell(infoSheet, 0, 0, 'NoteGym - Exportación de Rutina',
+          bold: true, size: 14);
       _addCell(infoSheet, 1, 0, '');
       _addCell(infoSheet, 2, 0, 'Nombre:', bold: true);
       _addCell(infoSheet, 2, 1, routine.name);
@@ -37,7 +39,14 @@ class ExcelExportService {
       final exSheet = excel['Ejercicios'];
       // Headers
       final headers = [
-        'Ejercicio', 'Músculo', 'Series', 'Reps', 'Peso (kg)', 'Descanso (seg)', 'Equipo', 'Descripción'
+        'Ejercicio',
+        'Músculo',
+        'Series',
+        'Reps',
+        'Peso (kg)',
+        'Descanso (seg)',
+        'Equipo',
+        'Descripción'
       ];
       for (int j = 0; j < headers.length; j++) {
         _addCell(exSheet, 0, j, headers[j], bold: true);
@@ -65,8 +74,9 @@ class ExcelExportService {
       if (bytes == null) throw Exception('Error al generar el archivo');
 
       final dir = await getApplicationDocumentsDirectory();
-      final safeName = routine.name.replaceAll(RegExp(r'[^\w\s]'), '').replaceAll(' ', '_');
-      final path = '${dir.path}/NoteGym_${safeName}.xlsx';
+      final safeName =
+          routine.name.replaceAll(RegExp(r'[^\w\s]'), '').replaceAll(' ', '_');
+      final path = '${dir.path}/NoteGym_$safeName.xlsx';
       final file = File(path);
       await file.writeAsBytes(bytes);
 
@@ -80,7 +90,7 @@ class ExcelExportService {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('¡Rutina exportada con éxito!'),
+            content: const Text('¡Rutina exportada con éxito!'),
             backgroundColor: context.colors.success,
           ),
         );
@@ -104,7 +114,12 @@ class ExcelExportService {
       final sheet = excel['Ejercicios'];
 
       final headers = [
-        'Ejercicio', 'Músculo', 'Series', 'Reps', 'Peso (kg)', 'Descanso (seg)'
+        'Ejercicio',
+        'Músculo',
+        'Series',
+        'Reps',
+        'Peso (kg)',
+        'Descanso (seg)'
       ];
       for (int j = 0; j < headers.length; j++) {
         _addCell(sheet, 0, j, headers[j], bold: true);
@@ -138,7 +153,9 @@ class ExcelExportService {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: context.colors.error),
+          SnackBar(
+              content: Text('Error: $e'),
+              backgroundColor: context.colors.error),
         );
       }
     }
@@ -146,7 +163,8 @@ class ExcelExportService {
 
   static void _addCell(Sheet sheet, int row, int col, String text,
       {bool bold = false, double? size}) {
-    final cell = sheet.cell(CellIndex.indexByColumnRow(columnIndex: col, rowIndex: row));
+    final cell =
+        sheet.cell(CellIndex.indexByColumnRow(columnIndex: col, rowIndex: row));
     cell.value = TextCellValue(text);
     if (bold || size != null) {
       cell.cellStyle = CellStyle(
@@ -158,12 +176,18 @@ class ExcelExportService {
 
   static String _typeLabel(String type) {
     switch (type) {
-      case 'strength': return 'Fuerza';
-      case 'cardio': return 'Cardio';
-      case 'hiit': return 'HIIT';
-      case 'yoga': return 'Yoga';
-      case 'flexibility': return 'Flexibilidad';
-      default: return type;
+      case 'strength':
+        return 'Fuerza';
+      case 'cardio':
+        return 'Cardio';
+      case 'hiit':
+        return 'HIIT';
+      case 'yoga':
+        return 'Yoga';
+      case 'flexibility':
+        return 'Flexibilidad';
+      default:
+        return type;
     }
   }
 }
