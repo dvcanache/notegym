@@ -13,6 +13,13 @@ class UserProfile {
   double? weightKg;
   double? heightCm;
 
+  // Onboarding
+  String? fitnessLevel;
+  String? somatotype;
+  int? weeklyDays;
+  String? primaryGoal;
+  bool onboardingCompleted;
+
   UserProfile({
     required this.id,
     required this.name,
@@ -27,6 +34,11 @@ class UserProfile {
     this.lastWorkoutDate,
     this.weightKg,
     this.heightCm,
+    this.fitnessLevel,
+    this.somatotype,
+    this.weeklyDays,
+    this.primaryGoal,
+    this.onboardingCompleted = false,
   }) : joinDate = joinDate ?? DateTime.now();
 
   UserProfile copyWith({
@@ -43,6 +55,11 @@ class UserProfile {
     DateTime? lastWorkoutDate,
     double? weightKg,
     double? heightCm,
+    String? fitnessLevel,
+    String? somatotype,
+    int? weeklyDays,
+    String? primaryGoal,
+    bool? onboardingCompleted,
   }) {
     return UserProfile(
       id: id ?? this.id,
@@ -58,6 +75,11 @@ class UserProfile {
       lastWorkoutDate: lastWorkoutDate ?? this.lastWorkoutDate,
       weightKg: weightKg ?? this.weightKg,
       heightCm: heightCm ?? this.heightCm,
+      fitnessLevel: fitnessLevel ?? this.fitnessLevel,
+      somatotype: somatotype ?? this.somatotype,
+      weeklyDays: weeklyDays ?? this.weeklyDays,
+      primaryGoal: primaryGoal ?? this.primaryGoal,
+      onboardingCompleted: onboardingCompleted ?? this.onboardingCompleted,
     );
   }
 
@@ -75,6 +97,11 @@ class UserProfile {
         'lastWorkoutDate': lastWorkoutDate?.toIso8601String(),
         'weightKg': weightKg,
         'heightCm': heightCm,
+        'fitnessLevel': fitnessLevel,
+        'somatotype': somatotype,
+        'weeklyDays': weeklyDays,
+        'primaryGoal': primaryGoal,
+        'onboardingCompleted': onboardingCompleted,
       };
 
   factory UserProfile.fromJson(Map<String, dynamic> json) => UserProfile(
@@ -95,5 +122,10 @@ class UserProfile {
             : null,
         weightKg: (json['weightKg'] as num?)?.toDouble(),
         heightCm: (json['heightCm'] as num?)?.toDouble(),
+        fitnessLevel: json['fitnessLevel'] as String?,
+        somatotype: json['somatotype'] as String?,
+        weeklyDays: (json['weeklyDays'] as num?)?.toInt(),
+        primaryGoal: json['primaryGoal'] as String?,
+        onboardingCompleted: json['onboardingCompleted'] as bool? ?? false,
       );
 }

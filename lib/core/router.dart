@@ -17,12 +17,15 @@ import '../features/auth/auth_provider.dart';
 import '../features/auth/presentation/providers/auth_provider.dart';
 import '../features/tenant/tenant_provider.dart';
 import '../features/tenant/join_screen.dart';
+import '../features/onboarding/onboarding_screen.dart';
+import '../features/onboarding/onboarding_provider.dart';
+import '../features/assessment/presentation/assessment_screen.dart';
 import '../widgets/app_shell.dart';
 
 // ──────────────────────────────────────────────
 // AuthGate
 //   - No autenticado → /login
-//   - Autenticado en /login → /home
+//   - Autenticado en /login → ruta interna (pasa al siguiente guard)
 // ──────────────────────────────────────────────
 String? _authGuard(GoRouterState state, bool isLoggedIn) {
   final isOnLogin = state.matchedLocation.startsWith('/login');
@@ -45,6 +48,20 @@ String? _tenantGuard(GoRouterState state, TenantState tenantState) {
   return null;
 }
 
+// ──────────────────────────────────────────────
+// OnboardingGate
+//   - isLoading → esperar (no redirect)
+//   - Sin onboarding completo → /onboarding
+//   - Con onboarding en /onboarding → /home
+// ──────────────────────────────────────────────
+String? _onboardingGuard(GoRouterState state, OnboardingState onboardingState) {
+  if (onboardingState.isLoading) return null;
+  final isOnOnboarding = state.matchedLocation == '/onboarding';
+  if (!onboardingState.isCompleted && !isOnOnboarding) return '/onboarding';
+  if (onboardingState.isCompleted && isOnOnboarding) return '/home';
+  return null;
+}
+
 /// Notificador externo para forzar a GoRouter a re-evaluar el redirect
 /// cuando cambia el estado de autenticación.
 final _routerRefreshNotifier = ValueNotifier(0);
@@ -53,6 +70,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   final localAuth = ref.watch(authProvider);
   final firebaseUser = ref.watch(authStateProvider);
   final tenantState = ref.watch(tenantProvider);
+  final onboardingState = ref.watch(onboardingProvider);
 
   final isLoggedIn =
       localAuth.isLoggedIn || firebaseUser.valueOrNull != null;
@@ -66,6 +84,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (isLoggedIn) {
         final tenantRedirect = _tenantGuard(state, tenantState);
         if (tenantRedirect != null) return tenantRedirect;
+        final onboardingRedirect = _onboardingGuard(state, onboardingState);
+        if (onboardingRedirect != null) return onboardingRedirect;
       }
       return null;
     },
@@ -90,6 +110,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/join',
         builder: (context, state) => const JoinScreen(),
+      ),
+      GoRoute(
+        path: '/onboarding',
+        builder: (context, state) => const OnboardingScreen(),
+      ),
+      GoRoute(
+        path: '/assessment',
+        builder: (context, state) => const AssessmentScreen(),
       ),
       ShellRoute(
         builder: (context, state, child) => AppShell(child: child),

@@ -10,6 +10,8 @@ import '../auth/auth_provider.dart';
 import '../routines/routines_provider.dart';
 import '../workout/workout_logs_provider.dart';
 import 'package:notegym/core/theme_extension.dart';
+import 'package:notegym/features/assessment/presentation/providers/assessment_provider.dart';
+import 'package:notegym/models/assessment.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -25,6 +27,13 @@ class HomeScreen extends ConsumerWidget {
     final now = DateTime.now();
     final greeting = _greeting(now.hour);
     final dateStr = DateFormat("EEEE, d 'de' MMMM", 'es').format(now);
+
+    final assessments = ref.watch(assessmentProvider).assessments;
+    final lastAssessment = assessments.isEmpty
+        ? null
+        : assessments.reduce((a, b) => a.date.isAfter(b.date) ? a : b);
+    final hasCheckinThisWeek = lastAssessment != null &&
+        lastAssessment.date.isAfter(now.subtract(const Duration(days: 7)));
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -164,6 +173,15 @@ class HomeScreen extends ConsumerWidget {
 
                       const SizedBox(height: 28),
 
+                      // Check-In Semanal
+                      _WellnessCheckinCard(
+                        hasThisWeek: hasCheckinThisWeek,
+                        lastAssessment: lastAssessment,
+                        onTap: () => context.push('/assessment'),
+                      ).animate().fadeIn(delay: 500.ms),
+
+                      const SizedBox(height: 28),
+
                       // Week day tracker
                       _WeekDayTracker(weekLogs: weekLogs)
                           .animate()
@@ -282,6 +300,150 @@ class _StatCard extends StatelessWidget {
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _WellnessCheckinCard extends StatelessWidget {
+  final bool hasThisWeek;
+  final Assessment? lastAssessment;
+  final VoidCallback onTap;
+
+  const _WellnessCheckinCard({
+    required this.hasThisWeek,
+    required this.lastAssessment,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    if (!hasThisWeek || lastAssessment == null) return _buildPrompt(colors);
+
+    final score = lastAssessment!.wellnessScore;
+    final scoreColor = score >= 80
+        ? colors.success
+        : (score >= 50 ? Colors.amber : colors.error);
+    final label = score >= 80
+        ? 'Excelente recuperación'
+        : (score >= 60
+            ? 'Buena recuperación'
+            : (score >= 40 ? 'Recuperación regular' : 'Necesita atención'));
+
+    return GlassCard(
+      onTap: onTap,
+      padding: const EdgeInsets.all(18),
+      borderRadius: 18,
+      child: Row(
+        children: [
+          SizedBox(
+            width: 52,
+            height: 52,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                CircularProgressIndicator(
+                  value: score / 100,
+                  strokeWidth: 5,
+                  backgroundColor: colors.glassBorder,
+                  valueColor: AlwaysStoppedAnimation(scoreColor),
+                  strokeCap: StrokeCap.round,
+                ),
+                Text(
+                  '${score.round()}',
+                  style: TextStyle(
+                    color: scoreColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Check-In Semanal',
+                  style: TextStyle(
+                    color: colors.textPrimary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: scoreColor,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Icon(Icons.arrow_forward_ios_rounded,
+              color: colors.textMuted, size: 16),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPrompt(AppColorsExtension colors) {
+    return GlassCard(
+      onTap: onTap,
+      padding: const EdgeInsets.all(18),
+      borderRadius: 18,
+      backgroundColor: colors.primary.withValues(alpha: 0.08),
+      borderColor: colors.primary.withValues(alpha: 0.3),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              gradient: colors.purpleOrangeGradient,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: const Icon(Icons.health_and_safety_outlined,
+                color: Colors.white, size: 24),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Check-In Semanal',
+                  style: TextStyle(
+                    color: colors.textPrimary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Evalúa tu recuperación para ajustar tu entrenamiento',
+                  style: TextStyle(color: colors.textMuted, fontSize: 12),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          GradientButton(
+            label: 'Comenzar',
+            width: 110,
+            height: 38,
+            fontSize: 13,
+            onPressed: onTap,
           ),
         ],
       ),
