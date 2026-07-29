@@ -30,7 +30,8 @@ String? _authGuard(GoRouterState state, bool isLoggedIn) {
 }
 
 String? _tenantGuard(GoRouterState state, TenantState tenantState) {
-  if (tenantState.isLoading) return null;
+  if (!tenantState.isInitialized) return null;
+  if (state.matchedLocation == '/onboarding') return null;
   final isOnJoin = state.matchedLocation == '/join';
   if (!tenantState.hasTenant && !isOnJoin) return '/join';
   if (tenantState.hasTenant && isOnJoin) return '/home';
@@ -38,10 +39,11 @@ String? _tenantGuard(GoRouterState state, TenantState tenantState) {
 }
 
 String? _onboardingGuard(GoRouterState state, OnboardingState onboardingState) {
-  if (onboardingState.isLoading) return null;
-  final isOnOnboarding = state.matchedLocation == '/onboarding';
-  if (!onboardingState.isCompleted && !isOnOnboarding) return '/onboarding';
-  if (onboardingState.isCompleted && isOnOnboarding) return '/home';
+  debugPrint('[Guard Check] isInitialized: ${onboardingState.isInitialized}, isCompleted: ${onboardingState.isCompleted}');
+  if (!onboardingState.isInitialized) return null;
+  if (state.matchedLocation == '/onboarding') return null;
+  if (state.matchedLocation == '/join') return null;
+  if (!onboardingState.isCompleted) return '/onboarding';
   return null;
 }
 
@@ -58,16 +60,27 @@ final routerProvider = Provider<GoRouter>((ref) {
           localAuth.isLoggedIn || firebaseUser.valueOrNull != null;
 
       if (state.matchedLocation == '/') {
-        return isLoggedIn ? '/home' : '/login';
+        final dest = isLoggedIn ? '/home' : '/login';
+        debugPrint('[Router Redirect] Redirigiendo desde ${state.uri} hacia: $dest');
+        return dest;
       }
 
       final authRedirect = _authGuard(state, isLoggedIn);
-      if (authRedirect != null) return authRedirect;
+      if (authRedirect != null) {
+        debugPrint('[Router Redirect] Redirigiendo desde ${state.uri} hacia: $authRedirect');
+        return authRedirect;
+      }
       if (isLoggedIn) {
         final tenantRedirect = _tenantGuard(state, tenantState);
-        if (tenantRedirect != null) return tenantRedirect;
+        if (tenantRedirect != null) {
+          debugPrint('[Router Redirect] Redirigiendo desde ${state.uri} hacia: $tenantRedirect');
+          return tenantRedirect;
+        }
         final onboardingRedirect = _onboardingGuard(state, onboardingState);
-        if (onboardingRedirect != null) return onboardingRedirect;
+        if (onboardingRedirect != null) {
+          debugPrint('[Router Redirect] Redirigiendo desde ${state.uri} hacia: $onboardingRedirect');
+          return onboardingRedirect;
+        }
       }
       return null;
     },
@@ -94,6 +107,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const JoinScreen(),
       ),
       GoRoute(
+        name: 'onboarding',
         path: '/onboarding',
         builder: (context, state) => const OnboardingScreen(),
       ),

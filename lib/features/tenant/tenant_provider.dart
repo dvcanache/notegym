@@ -9,12 +9,14 @@ class TenantState {
   final String? tenantId;
   final Gym? activeGym;
   final bool isLoading;
+  final bool isInitialized;
   final String? error;
 
   const TenantState({
     this.tenantId,
     this.activeGym,
     this.isLoading = false,
+    this.isInitialized = false,
     this.error,
   });
 
@@ -24,6 +26,7 @@ class TenantState {
     String? tenantId,
     Gym? activeGym,
     bool? isLoading,
+    bool? isInitialized,
     String? error,
     bool clearError = false,
   }) {
@@ -31,6 +34,7 @@ class TenantState {
       tenantId: tenantId ?? this.tenantId,
       activeGym: activeGym ?? this.activeGym,
       isLoading: isLoading ?? this.isLoading,
+      isInitialized: isInitialized ?? this.isInitialized,
       error: clearError ? null : (error ?? this.error),
     );
   }
@@ -55,11 +59,30 @@ class TenantNotifier extends StateNotifier<TenantState> {
       tenantId = await StorageService.get<String>('tenantId');
     }
 
+    if (tenantId == null) {
+      final uid = profile?.id;
+      if (uid != null && !uid.startsWith('local_') && !uid.startsWith('google_mock_')) {
+        try {
+          final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+          if (doc.exists) {
+            tenantId = doc.data()?['tenantId'] as String?;
+          }
+        } catch (_) {}
+      }
+    }
+
     if (tenantId != null) {
       final gym = await GymService.getGymById(tenantId);
-      state = TenantState(tenantId: tenantId, activeGym: gym);
+      if (profile?.tenantId == null) {
+        final updated = profile?.copyWith(tenantId: tenantId);
+        if (updated != null) {
+          await _ref.read(authProvider.notifier).updateProfile(updated);
+        }
+        await StorageService.set('tenantId', tenantId);
+      }
+      state = TenantState(tenantId: tenantId, activeGym: gym, isInitialized: true);
     } else {
-      state = const TenantState();
+      state = const TenantState(isInitialized: true);
     }
   }
 
@@ -72,6 +95,7 @@ class TenantNotifier extends StateNotifier<TenantState> {
         state = state.copyWith(
           isLoading: false,
           error: 'Gimnasio no encontrado',
+          isInitialized: true,
         );
         return;
       }
@@ -93,9 +117,9 @@ class TenantNotifier extends StateNotifier<TenantState> {
         await _ref.read(authProvider.notifier).updateProfile(updated);
       }
 
-      state = TenantState(tenantId: gymId, activeGym: gym);
+      state = TenantState(tenantId: gymId, activeGym: gym, isInitialized: true);
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      state = state.copyWith(isLoading: false, error: e.toString(), isInitialized: true);
     }
   }
 
@@ -120,9 +144,9 @@ class TenantNotifier extends StateNotifier<TenantState> {
         await _ref.read(authProvider.notifier).updateProfile(updated);
       }
 
-      state = const TenantState();
+      state = const TenantState(isInitialized: true);
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      state = state.copyWith(isLoading: false, error: e.toString(), isInitialized: true);
     }
   }
 

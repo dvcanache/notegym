@@ -23,6 +23,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
 
+  bool _isEmailLoading = false;
+  bool _isGoogleLoading = false;
+
+  bool get _anyLoading => _isEmailLoading || _isGoogleLoading;
+
   @override
   void dispose() {
     _emailCtrl.dispose();
@@ -32,20 +37,30 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _signIn() async {
     if (!_formKey.currentState!.validate()) return;
-    await ref.read(firebase.authControllerProvider.notifier).signInWithEmail(
-          _emailCtrl.text.trim(),
-          _passwordCtrl.text,
-        );
+    setState(() => _isEmailLoading = true);
+    try {
+      await ref.read(firebase.authControllerProvider.notifier).signInWithEmail(
+            _emailCtrl.text.trim(),
+            _passwordCtrl.text,
+          );
+    } finally {
+      if (mounted) setState(() => _isEmailLoading = false);
+    }
   }
 
   Future<void> _signInWithGoogle() async {
     log('[LoginScreen] Google button clicked');
-    await ref.read(firebase.authControllerProvider.notifier).signInWithGoogle();
-    if (!mounted) return;
-    final loggedIn = ref.read(authProvider).isLoggedIn;
-    log('[LoginScreen] signInWithGoogle completed, isLoggedIn=$loggedIn');
-    if (loggedIn) {
-      GoRouter.of(context).go('/join');
+    setState(() => _isGoogleLoading = true);
+    try {
+      await ref.read(firebase.authControllerProvider.notifier).signInWithGoogle();
+      if (!mounted) return;
+      final loggedIn = ref.read(authProvider).isLoggedIn;
+      log('[LoginScreen] signInWithGoogle completed, isLoggedIn=$loggedIn');
+      if (loggedIn) {
+        GoRouter.of(context).go('/join');
+      }
+    } finally {
+      if (mounted) setState(() => _isGoogleLoading = false);
     }
   }
 
@@ -53,8 +68,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final localAuthState = ref.watch(authProvider);
-    final authControllerState = ref.watch(firebase.authControllerProvider);
-    final isLoading = localAuthState.isLoading || authControllerState.isLoading;
+    final isSessionLoading = localAuthState.isLoading;
+    final isBusy = isSessionLoading || _anyLoading;
 
     ref.listen<AsyncValue<void>>(firebase.authControllerProvider, (_, next) {
       if (next is AsyncData) {
@@ -248,8 +263,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           GradientButton(
                             label: 'Ingresar',
                             icon: Icons.arrow_forward_rounded,
-                            onPressed: isLoading ? null : _signIn,
-                            isLoading: isLoading,
+                            onPressed: isBusy ? null : _signIn,
+                            isLoading: _isEmailLoading,
                           ),
 
                           const SizedBox(height: 16),
@@ -257,8 +272,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           OutlinedGlassButton(
                             label: 'Continuar con Google',
                             icon: Icons.g_mobiledata_rounded,
-                            isLoading: isLoading,
-                            onPressed: isLoading ? null : _signInWithGoogle,
+                            isLoading: _isGoogleLoading,
+                            onPressed: isBusy ? null : _signInWithGoogle,
                           ),
 
                           const SizedBox(height: 12),

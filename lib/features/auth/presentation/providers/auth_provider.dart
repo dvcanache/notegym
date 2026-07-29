@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:notegym/features/auth/auth_provider.dart';
+import 'package:notegym/features/onboarding/onboarding_provider.dart';
 import 'package:notegym/features/tenant/gym_service.dart';
 import 'package:notegym/features/tenant/tenant_provider.dart';
 import 'package:notegym/models/user_profile.dart';
@@ -25,6 +26,11 @@ class AuthController extends StateNotifier<AsyncValue<void>> {
   final Ref _ref;
 
   AuthController(this._ref) : super(const AsyncValue.data(null));
+
+  void _refreshOnboardingAndTenant() {
+    _ref.invalidate(onboardingProvider);
+    _ref.invalidate(tenantProvider);
+  }
 
   Future<void> signInWithGoogle({String? name, String? email}) async {
     debugPrint('[AuthController] signInWithGoogle called');
@@ -48,6 +54,7 @@ class AuthController extends StateNotifier<AsyncValue<void>> {
       await _simulateGoogleSignIn(name: name, email: email);
     }
 
+    _refreshOnboardingAndTenant();
     state = const AsyncValue.data(null);
   }
 
@@ -62,6 +69,7 @@ class AuthController extends StateNotifier<AsyncValue<void>> {
         password: password,
       );
       await _saveFirebaseUser(userCredential.user!);
+      _refreshOnboardingAndTenant();
       state = const AsyncValue.data(null);
     } on FirebaseAuthException catch (e) {
       debugPrint('[AuthController] signInWithEmail error: ${e.code}');
@@ -83,6 +91,7 @@ class AuthController extends StateNotifier<AsyncValue<void>> {
       );
       await userCredential.user?.updateDisplayName(name);
       await _saveFirebaseUser(userCredential.user!, gymSlug: gymSlug);
+      _refreshOnboardingAndTenant();
       state = const AsyncValue.data(null);
     } on FirebaseAuthException catch (e) {
       debugPrint('[AuthController] signUpWithEmail error: ${e.code}');
