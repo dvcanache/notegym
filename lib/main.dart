@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:firebase_core/firebase_core.dart'; // <--- 1. Importar Firebase Core
+import 'package:google_fonts/google_fonts.dart';
 import 'firebase_options.dart'; // <--- 2. Importar las opciones generadas
 
 import 'core/theme.dart';
@@ -10,6 +11,8 @@ import 'core/router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  GoogleFonts.config.allowRuntimeFetching = false;
 
   // 3. Inicializar Firebase según la plataforma actual (Windows, Android, etc.)
   await Firebase.initializeApp(

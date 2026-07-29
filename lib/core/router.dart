@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../features/auth/login_screen.dart';
+import '../features/auth/register_screen.dart';
 import '../features/home/home_screen.dart';
 import '../features/routines/routines_screen.dart';
 import '../features/routines/routine_detail_screen.dart';
@@ -14,6 +15,8 @@ import '../features/progress/progress_screen.dart';
 import '../features/profile/profile_screen.dart';
 import '../features/auth/auth_provider.dart';
 import '../features/auth/presentation/providers/auth_provider.dart';
+import '../features/tenant/tenant_provider.dart';
+import '../features/tenant/join_screen.dart';
 import '../widgets/app_shell.dart';
 
 // ──────────────────────────────────────────────
@@ -22,25 +25,25 @@ import '../widgets/app_shell.dart';
 //   - Autenticado en /login → /home
 // ──────────────────────────────────────────────
 String? _authGuard(GoRouterState state, bool isLoggedIn) {
-  final isOnLogin = state.matchedLocation == '/login';
+  final isOnLogin = state.matchedLocation.startsWith('/login');
   if (!isLoggedIn && !isOnLogin) return '/login';
   if (isLoggedIn && isOnLogin) return '/home';
   return null;
 }
 
 // ──────────────────────────────────────────────
-// TenantGate  (placeholder)
-//   - Verificar suscripción / tenant activo
-//   - Redirigir a /select-tenant si aplica
+// TenantGate
+//   - isLoading → esperar (no redirect)
+//   - Sin tenant → /join
+//   - Con tenant en /join → /home
 // ──────────────────────────────────────────────
-// String? _tenantGuard(GoRouterState state) { ... }
-
-// ──────────────────────────────────────────────
-// OnboardingGate  (placeholder)
-//   - Verificar si el perfil está completo
-//   - Redirigir a /onboarding si aplica
-// ──────────────────────────────────────────────
-// String? _onboardingGuard(GoRouterState state) { ... }
+String? _tenantGuard(GoRouterState state, TenantState tenantState) {
+  if (tenantState.isLoading) return null;
+  final isOnJoin = state.matchedLocation == '/join';
+  if (!tenantState.hasTenant && !isOnJoin) return '/join';
+  if (tenantState.hasTenant && isOnJoin) return '/home';
+  return null;
+}
 
 /// Notificador externo para forzar a GoRouter a re-evaluar el redirect
 /// cuando cambia el estado de autenticación.
@@ -49,6 +52,7 @@ final _routerRefreshNotifier = ValueNotifier(0);
 final routerProvider = Provider<GoRouter>((ref) {
   final localAuth = ref.watch(authProvider);
   final firebaseUser = ref.watch(authStateProvider);
+  final tenantState = ref.watch(tenantProvider);
 
   final isLoggedIn =
       localAuth.isLoggedIn || firebaseUser.valueOrNull != null;
@@ -59,16 +63,33 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final authRedirect = _authGuard(state, isLoggedIn);
       if (authRedirect != null) return authRedirect;
-      // final tenantRedirect = _tenantGuard(state);
-      // if (tenantRedirect != null) return tenantRedirect;
-      // final onboardingRedirect = _onboardingGuard(state);
-      // if (onboardingRedirect != null) return onboardingRedirect;
+      if (isLoggedIn) {
+        final tenantRedirect = _tenantGuard(state, tenantState);
+        if (tenantRedirect != null) return tenantRedirect;
+      }
       return null;
     },
     routes: [
       GoRoute(
         path: '/login',
         builder: (context, state) => const LoginScreen(),
+        routes: [
+          GoRoute(
+            path: 'register',
+            builder: (context, state) => const RegisterScreen(),
+          ),
+          GoRoute(
+            path: 'register/:gymSlug',
+            builder: (context, state) {
+              final slug = state.pathParameters['gymSlug'];
+              return RegisterScreen(gymSlug: slug);
+            },
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/join',
+        builder: (context, state) => const JoinScreen(),
       ),
       ShellRoute(
         builder: (context, state, child) => AppShell(child: child),

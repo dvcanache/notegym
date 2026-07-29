@@ -7,7 +7,8 @@ lib/
 ├── main.dart                          # Entry point, ProviderScope, MaterialApp.router
 ├── firebase_options.dart              # FlutterFire CLI
 ├── core/
-│   ├── router.dart                    # GoRouter + AuthGate + refreshListenable
+│   ├── router.dart                    # GoRouter + AuthGate + TenantGate + refreshListenable
+│   ├── storage_service.dart           # Wrapper SharedPreferences con prefijo notegym:
 │   ├── theme.dart                     # AppTheme (light/dark)
 │   ├── theme_extension.dart           # AppColorsExtension
 │   └── theme_provider.dart            # ThemeModeNotifier (Riverpod)
@@ -15,8 +16,9 @@ lib/
 │   └── default_routines.dart          # 8 rutinas precargadas
 ├── models/
 │   ├── exercise.dart                  # Ejercicio (id, nombre, grupo muscular, etc.)
+│   ├── gym.dart                       # Gimnasio (id, name, slug, address, createdBy, createdAt)
 │   ├── routine.dart                   # Rutina (id, nombre, ejercicios, etc.)
-│   ├── user_profile.dart              # Perfil de usuario (nombre, email, streak, etc.)
+│   ├── user_profile.dart              # Perfil de usuario (incluye tenantId)
 │   └── workout_log.dart               # Historial de entrenamiento (sets, volumen, etc.)
 ├── widgets/
 │   ├── app_shell.dart                 # ShellRoute + BottomNavigationBar
@@ -25,9 +27,10 @@ lib/
 └── features/
     ├── auth/
     │   ├── login_screen.dart          # Login con formulario local + botón Google
+    │   ├── register_screen.dart       # Registro con soporte gymSlug param
     │   ├── auth_provider.dart         # AuthNotifier (SharedPreferences)
     │   └── presentation/providers/
-    │       └── auth_provider.dart     # Firebase Auth + AuthController + mock
+    │       └── auth_provider.dart     # Firebase Auth + AuthController + mock + gymSlug
     ├── home/
     │   └── home_screen.dart           # Dashboard (stats, week tracker, quick-start)
     ├── routines/
@@ -42,6 +45,10 @@ lib/
     │   ├── active_workout_screen.dart # Timer, sets, descanso
     │   ├── workout_complete_screen.dart
     │   └── workout_logs_provider.dart # WorkoutLogsNotifier (SharedPreferences)
+    ├── tenant/
+    │   ├── gym_service.dart           # Firestore CRUD para colección gyms
+    │   ├── tenant_provider.dart       # TenantNotifier (SharedPreferences + Firestore sync)
+    │   └── join_screen.dart           # Selección de gimnasio con buscador + slug manual
     ├── history/
     │   └── history_screen.dart        # Historial agrupado por semana
     ├── progress/
@@ -57,21 +64,27 @@ lib/
 | `authProvider` | `features/auth/auth_provider.dart` | `SharedPreferences` |
 | `firebaseAuthProvider` | `features/auth/presentation/providers/auth_provider.dart` | `FirebaseAuth.instance` |
 | `authStateProvider` | ídem | `firebaseAuthProvider` |
-| `authControllerProvider` | ídem | `firebaseAuthProvider`, `authProvider`, `cloud_firestore` |
-| `routerProvider` | `core/router.dart` | `authProvider`, `authStateProvider` |
+| `authControllerProvider` | ídem | `firebaseAuthProvider`, `authProvider`, `cloud_firestore`, `tenantProvider` |
+| `routerProvider` | `core/router.dart` | `authProvider`, `authStateProvider`, `tenantProvider` |
+| `tenantProvider` | `features/tenant/tenant_provider.dart` | `SharedPreferences`, `cloud_firestore`, `authProvider` |
 | `themeModeProvider` | `core/theme_provider.dart` | `SharedPreferences` |
 
 ## Hoja de ruta
 
+### Pasos completados
+
+1. ✅ **TenantGate** — Guard de navegación para selección/asignación de gimnasio. Implementado:
+   - Modelo `Gym` en `lib/models/gym.dart`.
+   - `GymService` en `lib/features/tenant/gym_service.dart` (CRUD Firestore).
+   - `TenantProvider` en `lib/features/tenant/tenant_provider.dart`.
+   - Ruta `/join` con buscador + slug manual.
+   - `_tenantGuard` activo en `router.dart`.
+   - Soporte de `/login/register/:gymSlug` para vinculación directa.
+   - Cache local en `StorageService` (SharedPreferences).
+
 ### Próximos pasos técnicos
 
-1. **TenantGate** — Implementar guard de navegación para selección/asignación de gimnasio (tenant). Requiere:
-   - Modelo `Tenant` en `lib/models/`.
-   - Provider `tenantProvider`.
-   - Ruta `/select-tenant`.
-   - Activar `_tenantGuard` en `router.dart`.
-
-2. **OnboardingGate** — Implementar guard para completar datos iniciales del perfil (cédula, peso, altura, objetivo). Requiere:
+2. **OnboardingGate** — Implementar guard para completar datos iniciales del perfil (peso, altura, objetivo). Requiere:
    - Ruta `/onboarding`.
    - Provider `onboardingProvider`.
    - Activar `_onboardingGuard` en `router.dart`.

@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:ui';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -7,83 +6,55 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/gradient_button.dart';
-import 'auth_provider.dart';
 import 'presentation/providers/auth_provider.dart' as firebase;
 import 'package:notegym/core/theme_extension.dart';
 
-class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({super.key});
+class RegisterScreen extends ConsumerStatefulWidget {
+  final String? gymSlug;
+  const RegisterScreen({super.key, this.gymSlug});
 
   @override
-  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends ConsumerState<LoginScreen> {
+class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _nameCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
+  final _confirmCtrl = TextEditingController();
 
   @override
   void dispose() {
+    _nameCtrl.dispose();
     _emailCtrl.dispose();
     _passwordCtrl.dispose();
+    _confirmCtrl.dispose();
     super.dispose();
   }
 
-  Future<void> _signIn() async {
+  Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
-    await ref.read(firebase.authControllerProvider.notifier).signInWithEmail(
+    await ref.read(firebase.authControllerProvider.notifier).signUpWithEmail(
+          _nameCtrl.text.trim(),
           _emailCtrl.text.trim(),
           _passwordCtrl.text,
+          gymSlug: widget.gymSlug,
         );
-  }
-
-  Future<void> _signInWithGoogle() async {
-    log('[LoginScreen] Google button clicked');
-    await ref.read(firebase.authControllerProvider.notifier).signInWithGoogle();
-    if (!mounted) return;
-    final loggedIn = ref.read(authProvider).isLoggedIn;
-    log('[LoginScreen] signInWithGoogle completed, isLoggedIn=$loggedIn');
-    if (loggedIn) {
-      GoRouter.of(context).go('/join');
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final authControllerState = ref.watch(firebase.authControllerProvider);
-    final isGoogleLoading = authControllerState.isLoading;
+    final authState = ref.watch(firebase.authControllerProvider);
+    final isLoading = authState.isLoading;
 
     ref.listen<AsyncValue<void>>(firebase.authControllerProvider, (_, next) {
       if (next is AsyncData) {
         if (mounted) GoRouter.of(context).go('/join');
       } else if (next is AsyncError) {
-        final error = next.error;
-        if (error is FirebaseAuthException &&
-            (error.code == 'user-not-found' || error.code == 'invalid-credential')) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text(
-                'No existe una cuenta vinculada a este correo. Por favor regístrate.',
-                style: TextStyle(color: Colors.white),
-              ),
-              backgroundColor: Colors.red.shade700,
-              duration: const Duration(seconds: 8),
-              action: SnackBarAction(
-                label: 'Regístrate',
-                textColor: Colors.white,
-                onPressed: () => context.push('/login/register'),
-              ),
-            ),
-          );
-          return;
-        }
-        final msg = error is FirebaseAuthException
-            ? _firebaseErrorMessage(error as FirebaseAuthException)
-            : error is Exception
-                ? error.toString().replaceFirst('Exception: ', '')
-                : error.toString();
+        final msg = next.error is FirebaseAuthException
+            ? _firebaseErrorMessage(next.error as FirebaseAuthException)
+            : next.error.toString().replaceFirst('Exception: ', '');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(msg, style: const TextStyle(color: Colors.white)),
@@ -96,7 +67,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Gradient Background
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -110,7 +80,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
             ),
           ),
-          // Glow orbs
           Positioned(
             top: -80,
             left: -80,
@@ -124,24 +93,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             child: _GlowOrb(
                 color: context.colors.accent.withValues(alpha: 0.2), size: 250),
           ),
-          Positioned(
-            top: size.height * 0.4,
-            left: size.width * 0.5,
-            child: _GlowOrb(
-                color: context.colors.primaryLight.withValues(alpha: 0.1),
-                size: 200),
-          ),
 
-          // Content
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 28),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const SizedBox(height: 60),
+                  const SizedBox(height: 40),
 
-                  // Logo & Title
                   Container(
                     width: 80,
                     height: 80,
@@ -158,34 +118,50 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     child: const Icon(Icons.fitness_center_rounded,
                         color: Colors.white, size: 42),
-                  )
-                      .animate()
-                      .fadeIn(delay: 100.ms)
-                      .scale(begin: const Offset(0.7, 0.7)),
+                  ).animate().fadeIn(delay: 100.ms).scale(begin: const Offset(0.7, 0.7)),
 
                   const SizedBox(height: 24),
-
                   Text(
-                    'NoteGym',
-                    style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                    'Crear Cuenta',
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.w800,
-                          letterSpacing: -1,
                         ),
                   ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.3),
 
                   const SizedBox(height: 8),
-
                   Text(
-                    'Tu compañero de entrenamiento personal',
+                    'Regístrate para sincronizar tus datos',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: context.colors.textSecondary,
                         ),
                     textAlign: TextAlign.center,
                   ).animate().fadeIn(delay: 300.ms),
 
-                  const SizedBox(height: 56),
+                  if (widget.gymSlug != null)
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: context.colors.glassWhiteStrong,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: context.colors.glassBorder),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.info_outline, color: context.colors.primary, size: 20),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'Serás vinculado al gimnasio al registrarte',
+                              style: TextStyle(color: context.colors.textSecondary, fontSize: 13),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ).animate().fadeIn(delay: 350.ms),
 
-                  // Form
+                  const SizedBox(height: 40),
+
                   GlassCard(
                     padding: const EdgeInsets.all(24),
                     borderRadius: 24,
@@ -194,83 +170,74 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Comenzar',
-                            style: Theme.of(context).textTheme.headlineMedium,
+                          TextFormField(
+                            controller: _nameCtrl,
+                            style: TextStyle(color: context.colors.textPrimary),
+                            decoration: const InputDecoration(
+                              labelText: 'Nombre',
+                              prefixIcon:
+                                  Icon(Icons.person_outline),
+                            ),
+                            validator: (v) =>
+                                v == null || v.trim().isEmpty ? 'Ingresa tu nombre' : null,
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Inicia sesión con tu cuenta',
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                          const SizedBox(height: 24),
-
-                          // Email field
+                          const SizedBox(height: 16),
                           TextFormField(
                             controller: _emailCtrl,
                             keyboardType: TextInputType.emailAddress,
                             style: TextStyle(color: context.colors.textPrimary),
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               labelText: 'Correo electrónico',
-                              prefixIcon: Icon(Icons.email_outlined,
-                                  color: context.colors.textMuted),
+                              prefixIcon: Icon(Icons.email_outlined),
                             ),
                             validator: (v) {
-                              if (v == null || v.isEmpty)
-                                return 'Ingresa tu correo';
+                              if (v == null || v.isEmpty) return 'Ingresa tu correo';
                               if (!v.contains('@')) return 'Correo inválido';
                               return null;
                             },
                           ),
-
                           const SizedBox(height: 16),
-
-                          // Password field
                           TextFormField(
                             controller: _passwordCtrl,
                             obscureText: true,
                             style: TextStyle(color: context.colors.textPrimary),
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               labelText: 'Contraseña',
-                              prefixIcon: Icon(Icons.lock_outline,
-                                  color: context.colors.textMuted),
+                              prefixIcon: Icon(Icons.lock_outline),
                             ),
                             validator: (v) {
-                              if (v == null || v.isEmpty) return 'Ingresa tu contraseña';
-                              if (v.length < 6) return 'Mínimo 6 caracteres';
+                              if (v == null || v.length < 6) return 'Mínimo 6 caracteres';
                               return null;
                             },
                           ),
-
-                          const SizedBox(height: 28),
-
-                          GradientButton(
-                            label: 'Ingresar',
-                            icon: Icons.arrow_forward_rounded,
-                            onPressed: _signIn,
-                            isLoading: ref.watch(firebase.authControllerProvider).isLoading,
-                          ),
-
                           const SizedBox(height: 16),
-
-                          OutlinedGlassButton(
-                            label: 'Continuar con Google',
-                            icon: Icons.g_mobiledata_rounded,
-                            isLoading: isGoogleLoading,
-                            onPressed: isGoogleLoading ? null : _signInWithGoogle,
+                          TextFormField(
+                            controller: _confirmCtrl,
+                            obscureText: true,
+                            style: TextStyle(color: context.colors.textPrimary),
+                            decoration: const InputDecoration(
+                              labelText: 'Confirmar contraseña',
+                              prefixIcon: Icon(Icons.lock_outline),
+                            ),
+                            validator: (v) {
+                              if (v != _passwordCtrl.text) return 'Las contraseñas no coinciden';
+                              return null;
+                            },
                           ),
-
-                          const SizedBox(height: 12),
-
+                          const SizedBox(height: 24),
+                          GradientButton(
+                            label: 'Crear Cuenta',
+                            icon: Icons.person_add_rounded,
+                            onPressed: _register,
+                            isLoading: isLoading,
+                          ),
+                          const SizedBox(height: 16),
                           Center(
                             child: TextButton(
-                              onPressed: () => context.push('/login/register'),
+                              onPressed: () => context.go('/login'),
                               child: Text(
-                                '¿No tienes cuenta? Regístrate',
-                                style: TextStyle(
-                                  color: context.colors.accent,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                '¿Ya tienes cuenta? Inicia sesión',
+                                style: TextStyle(color: context.colors.textSecondary),
                               ),
                             ),
                           ),
@@ -280,17 +247,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.2),
 
                   const SizedBox(height: 32),
-
-                  Text(
-                    'Tus datos se sincronizan con tu cuenta',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontSize: 12,
-                          color: context.colors.textMuted,
-                        ),
-                    textAlign: TextAlign.center,
-                  ).animate().fadeIn(delay: 600.ms),
-
-                  const SizedBox(height: 40),
                 ],
               ),
             ),
@@ -302,16 +258,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   String _firebaseErrorMessage(FirebaseAuthException e) {
     switch (e.code) {
+      case 'email-already-in-use':
+        return 'Este correo ya está registrado';
+      case 'invalid-email':
+        return 'Correo electrónico inválido';
+      case 'weak-password':
+        return 'La contraseña es muy débil';
       case 'user-not-found':
         return 'Usuario no encontrado';
       case 'wrong-password':
         return 'Contraseña incorrecta';
-      case 'invalid-credential':
-        return 'Correo o contraseña inválidos';
-      case 'invalid-email':
-        return 'Correo electrónico inválido';
-      case 'too-many-requests':
-        return 'Demasiados intentos. Intenta más tarde';
       default:
         return 'Error: ${e.message ?? e.code}';
     }
