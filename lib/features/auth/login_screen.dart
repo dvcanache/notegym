@@ -52,8 +52,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final localAuthState = ref.watch(authProvider);
     final authControllerState = ref.watch(firebase.authControllerProvider);
-    final isGoogleLoading = authControllerState.isLoading;
+    final isLoading = localAuthState.isLoading || authControllerState.isLoading;
 
     ref.listen<AsyncValue<void>>(firebase.authControllerProvider, (_, next) {
       if (next is AsyncData) {
@@ -247,8 +248,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           GradientButton(
                             label: 'Ingresar',
                             icon: Icons.arrow_forward_rounded,
-                            onPressed: _signIn,
-                            isLoading: ref.watch(firebase.authControllerProvider).isLoading,
+                            onPressed: isLoading ? null : _signIn,
+                            isLoading: isLoading,
                           ),
 
                           const SizedBox(height: 16),
@@ -256,8 +257,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           OutlinedGlassButton(
                             label: 'Continuar con Google',
                             icon: Icons.g_mobiledata_rounded,
-                            isLoading: isGoogleLoading,
-                            onPressed: isGoogleLoading ? null : _signInWithGoogle,
+                            isLoading: isLoading,
+                            onPressed: isLoading ? null : _signInWithGoogle,
                           ),
 
                           const SizedBox(height: 12),

@@ -22,11 +22,6 @@ import '../features/onboarding/onboarding_provider.dart';
 import '../features/assessment/presentation/assessment_screen.dart';
 import '../widgets/app_shell.dart';
 
-// ──────────────────────────────────────────────
-// AuthGate
-//   - No autenticado → /login
-//   - Autenticado en /login → ruta interna (pasa al siguiente guard)
-// ──────────────────────────────────────────────
 String? _authGuard(GoRouterState state, bool isLoggedIn) {
   final isOnLogin = state.matchedLocation.startsWith('/login');
   if (!isLoggedIn && !isOnLogin) return '/login';
@@ -34,12 +29,6 @@ String? _authGuard(GoRouterState state, bool isLoggedIn) {
   return null;
 }
 
-// ──────────────────────────────────────────────
-// TenantGate
-//   - isLoading → esperar (no redirect)
-//   - Sin tenant → /join
-//   - Con tenant en /join → /home
-// ──────────────────────────────────────────────
 String? _tenantGuard(GoRouterState state, TenantState tenantState) {
   if (tenantState.isLoading) return null;
   final isOnJoin = state.matchedLocation == '/join';
@@ -48,12 +37,6 @@ String? _tenantGuard(GoRouterState state, TenantState tenantState) {
   return null;
 }
 
-// ──────────────────────────────────────────────
-// OnboardingGate
-//   - isLoading → esperar (no redirect)
-//   - Sin onboarding completo → /onboarding
-//   - Con onboarding en /onboarding → /home
-// ──────────────────────────────────────────────
 String? _onboardingGuard(GoRouterState state, OnboardingState onboardingState) {
   if (onboardingState.isLoading) return null;
   final isOnOnboarding = state.matchedLocation == '/onboarding';
@@ -62,23 +45,22 @@ String? _onboardingGuard(GoRouterState state, OnboardingState onboardingState) {
   return null;
 }
 
-/// Notificador externo para forzar a GoRouter a re-evaluar el redirect
-/// cuando cambia el estado de autenticación.
-final _routerRefreshNotifier = ValueNotifier(0);
-
 final routerProvider = Provider<GoRouter>((ref) {
-  final localAuth = ref.watch(authProvider);
-  final firebaseUser = ref.watch(authStateProvider);
-  final tenantState = ref.watch(tenantProvider);
-  final onboardingState = ref.watch(onboardingProvider);
-
-  final isLoggedIn =
-      localAuth.isLoggedIn || firebaseUser.valueOrNull != null;
-
   final goRouter = GoRouter(
-    refreshListenable: _routerRefreshNotifier,
     initialLocation: '/login',
     redirect: (context, state) {
+      final localAuth = ref.read(authProvider);
+      final firebaseUser = ref.read(authStateProvider);
+      final tenantState = ref.read(tenantProvider);
+      final onboardingState = ref.read(onboardingProvider);
+
+      final isLoggedIn =
+          localAuth.isLoggedIn || firebaseUser.valueOrNull != null;
+
+      if (state.matchedLocation == '/') {
+        return isLoggedIn ? '/home' : '/login';
+      }
+
       final authRedirect = _authGuard(state, isLoggedIn);
       if (authRedirect != null) return authRedirect;
       if (isLoggedIn) {
@@ -179,20 +161,34 @@ final routerProvider = Provider<GoRouter>((ref) {
         },
       ),
     ],
-    errorBuilder: (context, state) => const Scaffold(
-      backgroundColor: Color(0xFF0D0D1A),
-      body: Center(
-        child: Text(
-          'Página no encontrada',
-          style: TextStyle(color: Colors.white),
+    errorBuilder: (context, state) {
+      debugPrint('[GoRouter 404] Ruta no encontrada: ${state.uri}');
+      return Scaffold(
+        backgroundColor: const Color(0xFF0D0D1A),
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Página no encontrada',
+                style: TextStyle(color: Colors.white, fontSize: 18),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Ruta: ${state.uri}',
+                style: const TextStyle(color: Colors.grey, fontSize: 13),
+              ),
+            ],
+          ),
         ),
-      ),
-    ),
+      );
+    },
   );
 
-  WidgetsBinding.instance.addPostFrameCallback(
-    (_) => _routerRefreshNotifier.value++,
-  );
+  ref.listen(authProvider, (_, __) => goRouter.refresh());
+  ref.listen(authStateProvider, (_, __) => goRouter.refresh());
+  ref.listen(tenantProvider, (_, __) => goRouter.refresh());
+  ref.listen(onboardingProvider, (_, __) => goRouter.refresh());
 
   return goRouter;
 });
