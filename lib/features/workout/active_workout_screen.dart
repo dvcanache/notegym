@@ -4,12 +4,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
-import '../../core/theme.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/gradient_button.dart';
+import '../auth/auth_provider.dart';
 import '../routines/routines_provider.dart';
 import '../workout/workout_logs_provider.dart';
 import '../../models/workout_log.dart';
+import '../../core/database/database_helper.dart';
 import 'package:notegym/core/theme_extension.dart';
 
 class ActiveWorkoutScreen extends ConsumerStatefulWidget {
@@ -29,13 +30,16 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
   bool _isResting = false;
   int _currentExercise = 0;
 
-  // [exerciseIndex] -> [setIndex] -> {reps, weight, completed}
+  // [exerciseIndex] -> [setIndex] -> {reps, weight, rir, completed}
   List<List<Map<String, dynamic>>> _setData = [];
   bool _isSaving = false;
+  late final String _workoutId;
+  String? _currentUserId;
 
   @override
   void initState() {
     super.initState();
+    _workoutId = const Uuid().v4();
     _workoutTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       setState(() => _elapsedSeconds++);
     });
@@ -46,6 +50,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
     final routine =
         ref.read(routinesProvider.notifier).getById(widget.routineId);
     if (routine != null) {
+      final profile = ref.read(authProvider).profile;
+      _currentUserId = profile?.id;
       setState(() {
         _setData = routine.exercises.map((ex) {
           return List.generate(
@@ -53,6 +59,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
               (_) => {
                     'reps': ex.defaultReps,
                     'weight': ex.defaultWeight,
+                    'rir': 2,
                     'completed': false,
                   });
         }).toList();
@@ -80,6 +87,26 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
   void _skipRest() {
     _restTimer?.cancel();
     setState(() => _isResting = false);
+  }
+
+  Future<void> _saveSetToDb(int exerciseIndex, int setIndex) async {
+    final routine =
+        ref.read(routinesProvider.notifier).getById(widget.routineId);
+    if (routine == null) return;
+
+    final ex = routine.exercises[exerciseIndex];
+    final set = _setData[exerciseIndex][setIndex];
+    final setLogId = const Uuid().v4();
+
+    await DatabaseHelper.instance.insert('set_logs', {
+      'id': setLogId,
+      'workout_id': _workoutId,
+      'exercise_id': ex.id,
+      'weight': (set['weight'] as num).toDouble(),
+      'reps': set['reps'] as int,
+      'rir': set['rir'] as int,
+      'is_synced': 0,
+    });
   }
 
   @override
@@ -127,7 +154,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
     }
 
     final log = WorkoutLog(
-      id: const Uuid().v4(),
+      id: _workoutId,
       routineId: routine.id,
       routineName: routine.name,
       date: DateTime.now(),
@@ -136,6 +163,16 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
     );
 
     await ref.read(workoutLogsProvider.notifier).addLog(log);
+
+    final now = DateTime.now();
+    await DatabaseHelper.instance.insert('workouts', {
+      'id': _workoutId,
+      'user_id': _currentUserId ?? '',
+      'tenant_id': '',
+      'date': now.toIso8601String(),
+      'is_synced': 0,
+      'updated_at': now.toIso8601String(),
+    });
 
     if (mounted) {
       context.pushReplacement('/workout/complete', extra: {'logId': log.id});
@@ -409,7 +446,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                                                 color: context.colors.textMuted,
                                                 fontSize: 12,
                                                 fontWeight: FontWeight.w600)))),
-                                const SizedBox(width: 12),
+                                const SizedBox(width: 8),
                                 Expanded(
                                     child: Center(
                                         child: Text('Peso (kg)',
@@ -417,7 +454,16 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                                                 color: context.colors.textMuted,
                                                 fontSize: 12,
                                                 fontWeight: FontWeight.w600)))),
-                                const SizedBox(width: 12),
+                                const SizedBox(width: 8),
+                                SizedBox(
+                                    width: 56,
+                                    child: Center(
+                                        child: Text('RIR',
+                                            style: TextStyle(
+                                                color: context.colors.textMuted,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w600)))),
+                                const SizedBox(width: 8),
                                 SizedBox(
                                     width: 44,
                                     child: Center(
@@ -436,6 +482,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                             final i = e.key;
                             final set = e.value;
                             final completed = set['completed'] == true;
+                            final rir = set['rir'] as int;
 
                             return GlassCard(
                               padding: const EdgeInsets.symmetric(
@@ -475,7 +522,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                                     ),
                                   ),
 
-                                  const SizedBox(width: 12),
+                                  const SizedBox(width: 8),
 
                                   // Weight
                                   Expanded(
@@ -488,17 +535,33 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                                     ),
                                   ),
 
-                                  const SizedBox(width: 12),
+                                  const SizedBox(width: 8),
+
+                                  // RIR
+                                  _RirInput(
+                                    value: rir,
+                                    enabled: !completed,
+                                    onChanged: (v) => setState(() =>
+                                        _setData[_currentExercise][i]['rir'] =
+                                            v),
+                                  ),
+
+                                  const SizedBox(width: 8),
 
                                   // Complete toggle
                                   GestureDetector(
-                                    onTap: () {
+                                    onTap: () async {
                                       HapticFeedback.lightImpact();
+                                      final wasCompleted = completed;
+                                      if (!wasCompleted) {
+                                        await _saveSetToDb(
+                                            _currentExercise, i);
+                                      }
                                       setState(() {
                                         _setData[_currentExercise][i]
-                                            ['completed'] = !completed;
+                                            ['completed'] = !wasCompleted;
                                       });
-                                      if (!completed) {
+                                      if (!wasCompleted) {
                                         _startRest(currentEx.restSeconds);
                                       }
                                     },
@@ -688,6 +751,194 @@ class _SetInput extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class _RirInput extends StatelessWidget {
+  final int value;
+  final bool enabled;
+  final ValueChanged<int> onChanged;
+
+  const _RirInput({
+    required this.value,
+    required this.enabled,
+    required this.onChanged,
+  });
+
+  static Color _rirColor(int rir) {
+    if (rir <= 1) return Colors.redAccent;
+    if (rir == 2) return Colors.greenAccent;
+    return Colors.lightBlueAccent;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final color = _rirColor(value);
+
+    return GestureDetector(
+      onTap: enabled
+          ? () => _showRirPicker(context, value, onChanged)
+          : null,
+      child: Container(
+        width: 56,
+        height: 44,
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: color.withValues(alpha: 0.4)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.fitness_center_rounded,
+                size: 10, color: color),
+            const SizedBox(width: 4),
+            Text(
+              '$value',
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.w700,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showRirPicker(
+    BuildContext context,
+    int current,
+    ValueChanged<int> onChange,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[600],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Repeticiones en Reserva (RIR)',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '¿Cuántas repeticiones más podrías haber hecho?',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                  fontSize: 13,
+                ),
+              ),
+              const SizedBox(height: 20),
+              ...List.generate(6, (i) {
+                final rir = i;
+                final c = _rirColor(rir);
+                final isSelected = rir == current;
+                return GestureDetector(
+                  onTap: () {
+                    onChange(rir);
+                    Navigator.pop(ctx);
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? c.withValues(alpha: 0.2)
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isSelected
+                            ? c
+                            : Colors.grey.withValues(alpha: 0.2),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: c.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Center(
+                            child: Text(
+                              '$rir',
+                              style: TextStyle(
+                                color: c,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Text(
+                            _rirLabel(rir),
+                            style: TextStyle(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurface,
+                              fontWeight:
+                                  isSelected ? FontWeight.w600 : FontWeight.w400,
+                            ),
+                          ),
+                        ),
+                        if (isSelected)
+                          Icon(Icons.check_circle_rounded,
+                              color: c, size: 20),
+                      ],
+                    ),
+                  ),
+                );
+              }),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  String _rirLabel(int rir) {
+    switch (rir) {
+      case 0:
+        return 'Al fallo — no quedan reps';
+      case 1:
+        return 'Cerca del fallo — 1 rep en reserva';
+      case 2:
+        return 'Esfuerzo óptimo — 2 reps en reserva';
+      case 3:
+        return 'Moderado — 3 reps en reserva';
+      case 4:
+        return 'Cómodo — 4 reps en reserva';
+      case 5:
+        return 'Muy ligero — 5+ reps en reserva';
+      default:
+        return '';
+    }
   }
 }
 

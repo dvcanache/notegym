@@ -3,6 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:notegym/core/database/database_helper.dart';
+import 'package:notegym/core/services/sync_service.dart';
 import 'package:notegym/features/auth/auth_provider.dart';
 import 'package:notegym/features/onboarding/onboarding_provider.dart';
 import 'package:notegym/features/tenant/gym_service.dart';
@@ -184,16 +186,21 @@ class AuthController extends StateNotifier<AsyncValue<void>> {
   Future<void> signOut() async {
     state = const AsyncValue.loading();
     try {
-      try {
-        await _googleSignIn.signOut();
-      } catch (_) {}
+      SyncService.instance.stopListening();
+      await DatabaseHelper.instance.clearLocalData();
+    } catch (_) {}
+
+    try {
+      await _googleSignIn.signOut();
+    } catch (_) {}
+
+    try {
       final firebaseAuth = _ref.read(firebaseAuthProvider);
       await firebaseAuth.signOut();
-      await _ref.read(authProvider.notifier).signOut();
-      state = const AsyncValue.data(null);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
+    } catch (_) {}
+
+    await _ref.read(authProvider.notifier).signOut();
+    state = const AsyncValue.data(null);
   }
 }
 
